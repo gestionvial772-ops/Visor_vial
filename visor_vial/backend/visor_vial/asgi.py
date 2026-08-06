@@ -1,0 +1,1 @@
+# entrada ASGI (WebSocket / futuro)

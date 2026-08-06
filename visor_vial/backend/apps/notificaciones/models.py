@@ -1,0 +1,1 @@
+# TipoNotificacion + Notificacion (RNF12)

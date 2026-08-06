@@ -1,0 +1,1 @@
+# salida GeoJSON para Mapbox
