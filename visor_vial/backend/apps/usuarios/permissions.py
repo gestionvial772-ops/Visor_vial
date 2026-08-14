@@ -1,1 +1,17 @@
-# permisos por rol: IsAdmin, IsCiudadano, IsInvestigador
+from rest_framework.permissions import BasePermission
+
+
+class IsAdmin(BasePermission):
+	def has_permission(self, request, view):
+		return bool(request.user and request.user.is_authenticated and getattr(request.user, 'rol', '') == 'ADMIN')
+
+
+class IsCiudadano(BasePermission):
+	def has_permission(self, request, view):
+		return bool(request.user and request.user.is_authenticated and getattr(request.user, 'rol', '') == 'CIUDADANO')
+
+
+class IsInvestigador(BasePermission):
+	def has_permission(self, request, view):
+		return bool(request.user and request.user.is_authenticated and getattr(request.user, 'rol', '') == 'INVESTIGADOR')
+

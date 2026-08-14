@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "usuario_id": 10,
+    "via_id": 3,
+    "imagen_url": "https://via.placeholder.com/800x600.png?text=Reporte+1",
+    "descripcion": "Bache grande en intersección",
+    "estado": "PENDIENTE",
+    "fecha_creacion": "2026-08-13T10:12:00Z",
+    "coordenadas": { "lng": -78.87, "lat": -8.11 }
+  },
+  {
+    "id": 2,
+    "usuario_id": 12,
+    "via_id": 5,
+    "imagen_url": "https://via.placeholder.com/800x600.png?text=Reporte+2",
+    "descripcion": "Señalización borrada",
+    "estado": "EN_PROCESO",
+    "fecha_creacion": "2026-08-12T08:45:00Z",
+    "coordenadas": { "lng": -78.89, "lat": -8.12 }
+  }
+]
