@@ -1,0 +1,23 @@
+# Entornos y secretos
+.env
+.env.*
+!.env.example
+
+# Python / Django
+__pycache__/
+*.pyc
+.venv/
+venv/
+db.sqlite3
+staticfiles/
+media/
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+
+# Editor / SO
+.vscode/
+.DS_Store
+Thumbs.db
