@@ -1,14 +1,16 @@
 import React from 'react'
-import { createRoot } from 'react-dom/client'
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from 'react-router-dom'
 import App from './App'
-
-// Import Mapbox GL CSS so Vite bundles it and the map styles correctly
-import 'mapbox-gl/dist/mapbox-gl.css'
 import './styles.css'
 
-createRoot(document.getElementById('root')).render(
+import 'mapbox-gl/dist/mapbox-gl.css'
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
+    <BrowserRouter>
     <App />
+    </BrowserRouter>
+    
   </React.StrictMode>
 )
-// monta React + BrowserRouter en el DOM
+
