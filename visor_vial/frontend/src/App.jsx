@@ -1,15 +1,19 @@
 import React from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Mapa from './components/map/Mapa'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 
 export default function App() {
   return (
-    // <div style={{ width: '100%', height: '100%' }}>
-    //   <Mapa />
-    // </div>
+    <Routes>
+      <Route path='/login' element ={<Login/>}/>
+      <Route path= '/register' element= {<Register/>}/>
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-    <Register/>
+
+
+    </Routes>
   )
 }
 
