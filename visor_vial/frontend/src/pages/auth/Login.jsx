@@ -62,7 +62,7 @@ export default function Login() {
           <div className="flex items-center justify-between pt-2">
             <p className="text-sm text-slate-500">
               ¿Nuevo usuario?{" "}
-              <Link to="/registro" className="text-emerald-700 italic hover:underline">
+              <Link to="/register" className="text-emerald-700 italic hover:underline">
                 Regístrate
               </Link>
             </p>
