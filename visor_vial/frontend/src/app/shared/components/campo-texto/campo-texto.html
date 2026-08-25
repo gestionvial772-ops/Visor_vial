@@ -1,0 +1,16 @@
+<div class="campo">
+  @if (label) {
+    <label>{{ label }}</label>
+  }
+  <input
+    [type]="tipo"
+    [placeholder]="placeholder"
+    [value]="valor"
+    [disabled]="deshabilitado"
+    (input)="alCambiar($any($event.target).value)"
+    (blur)="alTocar()"
+  />
+  @if (mostrarError && mensajeError) {
+    <small class="error">{{ mensajeError }}</small>
+  }
+</div>

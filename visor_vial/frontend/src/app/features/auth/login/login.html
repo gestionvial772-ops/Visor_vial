@@ -1,0 +1,39 @@
+<div class="login-card">
+  <h1>SYNTHEVIA</h1>
+  <p>¡Bienvenido! Ingresa tus credenciales para gestionar el análisis vial.</p>
+
+  <form [formGroup]="formulario" (ngSubmit)="onSubmit()">
+    <label for="dni">DNI</label>
+    <input id="dni" type="text" formControlName="dni" maxlength="8" placeholder="12345678" />
+    @if (formulario.get('dni')?.touched && formulario.get('dni')?.invalid) {
+      <small class="error">El DNI debe tener exactamente 8 dígitos.</small>
+    }
+
+    <label for="contrasena">Contraseña</label>
+    <div class="campo-contrasena">
+      <input
+        id="contrasena"
+        [type]="mostrarContrasena ? 'text' : 'password'"
+        formControlName="contrasena"
+      />
+      <button type="button" (click)="alternarVisibilidadContrasena()">👁</button>
+    </div>
+    @if (formulario.get('contrasena')?.touched && formulario.get('contrasena')?.invalid) {
+      <small class="error">La contraseña es obligatoria.</small>
+    }
+
+    <div class="fila-opciones">
+      <label>
+        <input type="checkbox" formControlName="recordarme" />
+        Recordarme
+      </label>
+      <a href="#">¿Olvidaste tu contraseña?</a>
+    </div>
+
+
+    <div class="fila-registro">
+      <span>¿Nuevo usuario? <a routerLink="/auth/register">Regístrate</a></span>
+      <button type="submit">Iniciar sesión</button>
+    </div>
+  </form>
+</div>
