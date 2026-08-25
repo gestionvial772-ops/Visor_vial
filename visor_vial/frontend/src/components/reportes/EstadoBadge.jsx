@@ -1,1 +1,0 @@
-// chip de estado (PENDIENTE / EN_PROCESO / RESUELTO / DUPLICADO)

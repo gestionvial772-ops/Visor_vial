@@ -1,1 +1,0 @@
-// formulario: foto + GPS + descripción
