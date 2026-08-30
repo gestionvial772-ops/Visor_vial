@@ -19,6 +19,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';//pregu
 export class CampoTexto implements ControlValueAccessor{
   @Input() label = '';
   @Input() placeholder = '';
+  @Input() icono = '';
   @Input() tipo: 'text' | 'email' = 'text';
   @Input() mensajeError = '';
   @Input() mostrarError = false;

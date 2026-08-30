@@ -1,9 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
-  imports: [],
+  imports: [CommonModule, DatePipe],
   selector: 'app-imagen-con-reloj',
   styleUrl: './imagen-con-reloj.scss',
   templateUrl: './imagen-con-reloj.html',
 })
-export class ImagenConReloj {}
+export class ImagenConReloj {
+
+  @Input() imagenUrl = '';
+  @Input() fechaCaptura: Date = new Date()
+
+
+}

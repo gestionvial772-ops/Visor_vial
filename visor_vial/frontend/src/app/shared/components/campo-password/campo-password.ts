@@ -17,6 +17,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 })
 export class CampoPassword {
   @Input() label = 'Contraseña';
+  @Input() icono = 'lock'
   @Input() mensajeError = '';
   @Input() mostrarError = false;
 

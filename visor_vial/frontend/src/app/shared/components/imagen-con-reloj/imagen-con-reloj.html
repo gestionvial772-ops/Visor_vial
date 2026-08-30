@@ -1,1 +1,10 @@
-<p>imagen-con-reloj works!</p>
+<div class="position-relative h-100 w-100">
+  <img [src]="imagenUrl" alt="Imagen capturada" class="img-fluid w-100 h-100" style="object-fit: cover; min-height: 500px;" />
+  
+  <div class="position-absolute bottom-0 start-50 translate-middle-x mb-4 w-100 text-center">
+    <span class="badge rounded-pill shadow-sm px-3 py-2 text-dark" style="background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px);">
+      <i class="fa-regular fa-clock me-1 text-muted"></i>
+      {{ fechaCaptura | date: "EEEE, d 'de' MMMM, hh:mm:ss a" : '' : 'es-PE' }}
+    </span>
+  </div>
+</div>
