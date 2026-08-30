@@ -1,1 +1,0 @@
-# trigger IA + consulta resultados
