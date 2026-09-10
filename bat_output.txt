@@ -1,0 +1,6 @@
+============================================
+  VISOR VIAL - BACKEND Spring Boot 4
+============================================
+
+[1/4] Verificando Java...
+No se esperaba \Common en este momento.

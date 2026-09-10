@@ -1,0 +1,705 @@
+<!-- ══ CABECERA DE PÁGINA ══════════════════════════════════════════════ -->
+<div class="page-header-card">
+  <div class="page-header-icon">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+  </div>
+  <div class="page-header-text">
+    <h1 class="page-title">Reportes de daños</h1>
+    <p class="page-subtitle">Gestiona y consulta todos los reportes de daños registrados en el sistema.</p>
+  </div>
+  <button class="btn-nuevo-reporte" (click)="abrirModalNuevo()">
+    <i class="bi bi-plus-lg"></i>
+    <span>Nuevo reporte</span>
+  </button>
+</div>
+
+<!-- ══ BARRA DE FILTROS ═══════════════════════════════════════════════ -->
+<div class="filtros-card">
+  <div class="filtros-row">
+    <div class="filtro-group">
+      <label class="filtro-label">Estado</label>
+      <select class="filtro-select" [(ngModel)]="filtroEstado" (change)="aplicarFiltro()">
+        @for (op of estadosOpciones; track op.valor) {
+          <option [value]="op.valor">{{ op.etiqueta }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filtro-group filtro-group--buscar">
+      <label class="filtro-label">Buscar</label>
+      <div class="input-icon-wrap">
+        <i class="bi bi-search input-icon"></i>
+        <input class="filtro-input"
+               type="text"
+               placeholder="Descripción, ID de vía…"
+               [(ngModel)]="filtroBusqueda"
+               (keyup.enter)="aplicarFiltro()" />
+      </div>
+    </div>
+
+    <div class="filtro-group filtro-group--actions">
+      <button class="btn-limpiar" (click)="limpiarFiltros()" title="Limpiar filtros">
+        <i class="bi bi-x-circle"></i>
+      </button>
+      <button class="btn-filtrar" (click)="aplicarFiltro()">
+        <i class="bi bi-funnel"></i>Filtrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TARJETAS DE ESTADÍSTICAS ═══════════════════════════════════════ -->
+@if (estadisticas()) {
+  <div class="stats-grid">
+
+    <div class="stat-card stat-card--total">
+      <div class="stat-icon stat-icon--total">
+        <i class="bi bi-clipboard2-data-fill"></i>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ estadisticas()!.total }}</span>
+        <span class="stat-label">Total reportes</span>
+        <span class="stat-sub">100% del total</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--pendiente">
+      <div class="stat-icon stat-icon--pendiente">
+        <i class="bi bi-hourglass-split"></i>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ estadisticas()!.pendientes }}</span>
+        <span class="stat-label">Pendientes</span>
+        <span class="stat-sub">
+          {{ estadisticas()!.total > 0 ? ((estadisticas()!.pendientes / estadisticas()!.total) * 100 | number:'1.0-1') : 0 }}% del total
+        </span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--proceso">
+      <div class="stat-icon stat-icon--proceso">
+        <i class="bi bi-arrow-repeat"></i>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ estadisticas()!.enProceso }}</span>
+        <span class="stat-label">En proceso</span>
+        <span class="stat-sub">
+          {{ estadisticas()!.total > 0 ? ((estadisticas()!.enProceso / estadisticas()!.total) * 100 | number:'1.0-1') : 0 }}% del total
+        </span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--resuelto">
+      <div class="stat-icon stat-icon--resuelto">
+        <i class="bi bi-check2-circle"></i>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ estadisticas()!.resueltos }}</span>
+        <span class="stat-label">Resueltos</span>
+        <span class="stat-sub">
+          {{ estadisticas()!.total > 0 ? ((estadisticas()!.resueltos / estadisticas()!.total) * 100 | number:'1.0-1') : 0 }}% del total
+        </span>
+      </div>
+    </div>
+
+    @if (estadisticas()!.duplicados > 0) {
+      <div class="stat-card stat-card--duplicado">
+        <div class="stat-icon stat-icon--duplicado">
+          <i class="bi bi-copy"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-value">{{ estadisticas()!.duplicados }}</span>
+          <span class="stat-label">Duplicados</span>
+          <span class="stat-sub">
+            {{ estadisticas()!.total > 0 ? ((estadisticas()!.duplicados / estadisticas()!.total) * 100 | number:'1.0-1') : 0 }}% del total
+          </span>
+        </div>
+      </div>
+    }
+
+  </div>
+}
+
+<!-- ══ TABLA ════════════════════════════════════════════════════════ -->
+<div class="tabla-card">
+
+  <!-- Toolbar -->
+  <div class="tabla-toolbar">
+    <div class="toolbar-left">
+      <i class="bi bi-list-ul toolbar-icon"></i>
+      <span class="tabla-titulo">Lista de incidencias</span>
+      @if (totalElementos() > 0) {
+        <span class="total-badge">{{ totalElementos() }}</span>
+      }
+    </div>
+    <div class="toolbar-right">
+      <button class="btn-export" (click)="exportarCsv()" title="Exportar CSV">
+        <i class="bi bi-download me-1"></i>Exportar CSV
+      </button>
+      <button class="btn-refresh" (click)="cargarReportes(paginaActual())" title="Recargar">
+        <i class="bi bi-arrow-clockwise"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Estado de carga / error / vacío -->
+  @if (cargando()) {
+    <div class="estado-tabla">
+      <div class="spinner-border text-secondary" style="width:2rem;height:2rem"></div>
+      <span>Cargando reportes…</span>
+    </div>
+  } @else if (errorCarga()) {
+    <div class="estado-tabla estado-error">
+      <i class="bi bi-wifi-off fs-2"></i>
+      <span>No se pudo conectar con el servidor.</span>
+      <button class="btn-retry" (click)="cargarReportes(0)">
+        <i class="bi bi-arrow-clockwise me-1"></i>Reintentar
+      </button>
+    </div>
+  } @else if (reportes().length === 0) {
+    <div class="estado-tabla estado-vacio">
+      <i class="bi bi-inbox fs-2 text-muted"></i>
+      <span>No se encontraron reportes con los filtros aplicados.</span>
+    </div>
+  } @else {
+    <!-- TABLA REAL -->
+    <div class="tabla-wrapper">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Foto</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Vía</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of reportes(); track r.idReporte) {
+            <tr>
+              <td class="col-id">
+                <span class="id-chip">#{{ r.idReporte }}</span>
+              </td>
+              <td class="col-img">
+                @if (r.imagenUrl) {
+                  <img [src]="r.imagenUrl"
+                       alt="Reporte #{{ r.idReporte }}"
+                       class="thumb"
+                       (error)="onImgError($event)" />
+                } @else {
+                  <div class="thumb-placeholder">
+                    <i class="bi bi-image text-muted"></i>
+                  </div>
+                }
+              </td>
+              <td class="col-desc">
+                <span class="desc-text">{{ r.descripcion || '—' }}</span>
+
+              </td>
+              <td class="col-estado">
+                <span class="badge-estado badge-{{ r.estado | lowercase }}">
+                  <span class="badge-dot"></span>
+                  {{ etiquetaEstado(r.estado) }}
+                </span>
+              </td>
+              <td class="col-geo">
+                @if (r.idVia) {
+                  <span class="geo-chip">
+                    <i class="bi bi-signpost-2-fill"></i>
+                    Vía #{{ r.idVia }}
+                  </span>
+                } @else {
+                  <span class="text-muted small fst-italic">Sin vía</span>
+                }
+              </td>
+              <td class="col-fecha">
+                <span class="fecha-main">{{ r.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+                <span class="fecha-hora">{{ r.fechaCreacion | date:'HH:mm' }}</span>
+              </td>
+              <td class="col-acciones">
+                <div class="acciones-wrap">
+                  <button class="btn-accion btn-accion--ver" (click)="abrirVista(r)" title="Ver detalle">
+                    <i class="bi bi-eye"></i> Ver
+                  </button>
+                  <button class="btn-accion btn-accion--editar" (click)="abrirDetalle(r)" title="Editar estado">
+                    <i class="bi bi-pencil"></i> Editar
+                  </button>
+                  <button class="btn-accion btn-accion--eliminar" (click)="confirmarEliminar(r)" title="Eliminar reporte">
+                    <i class="bi bi-trash3"></i> Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PIE DE TABLA + PAGINACIÓN -->
+    <div class="tabla-footer">
+      <span class="tabla-info">
+        Mostrando {{ paginaActual() * tamanio + 1 }} a
+        {{ [((paginaActual() + 1) * tamanio), totalElementos()] | min }} de
+        {{ totalElementos() }} resultados
+      </span>
+
+      @if (totalPaginas() > 1) {
+        <div class="paginacion">
+          <button class="pag-btn" [disabled]="paginaActual() === 0" (click)="irAPagina(0)" title="Primera">
+            <i class="bi bi-chevron-double-left"></i>
+          </button>
+          <button class="pag-btn" [disabled]="paginaActual() === 0" (click)="irAPagina(paginaActual() - 1)">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          @for (p of paginasVisibles(); track p) {
+            <button class="pag-btn" [class.activo]="p === paginaActual()" (click)="irAPagina(p)">
+              {{ p + 1 }}
+            </button>
+          }
+          <button class="pag-btn" [disabled]="paginaActual() === totalPaginas() - 1" (click)="irAPagina(paginaActual() + 1)">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+          <button class="pag-btn" [disabled]="paginaActual() === totalPaginas() - 1" (click)="irAPagina(totalPaginas() - 1)" title="Última">
+            <i class="bi bi-chevron-double-right"></i>
+          </button>
+        </div>
+      }
+
+      <div class="tamanio-select-wrap">
+        <select class="tamanio-select" [(ngModel)]="tamanio" (change)="aplicarFiltro()">
+          <option [value]="5">5 por página</option>
+          <option [value]="10">10 por página</option>
+          <option [value]="25">25 por página</option>
+          <option [value]="50">50 por página</option>
+        </select>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- ══ MODAL VER DETALLE (solo lectura) ══════════════════════════════ -->
+@if (reporteVista()) {
+  <div class="modal-overlay" (click)="cerrarVista()">
+    <div class="modal-panel modal-panel--vista" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="mh-left">
+          <span class="mh-eyebrow">Reporte</span>
+          <h2 class="mh-titulo">#{{ reporteVista()!.idReporte }}</h2>
+        </div>
+        <div class="mh-right">
+          <span class="badge-estado badge-{{ reporteVista()!.estado | lowercase }}">
+            <span class="badge-dot"></span>{{ etiquetaEstado(reporteVista()!.estado) }}
+          </span>
+          <button class="modal-cerrar" (click)="cerrarVista()" title="Cerrar">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Imagen hero -->
+      @if (reporteVista()!.imagenUrl) {
+        <div class="modal-hero">
+          <img [src]="reporteVista()!.imagenUrl"
+               alt="Imagen del reporte #{{ reporteVista()!.idReporte }}"
+               class="modal-hero-img"
+               (error)="onImgError($event)" />
+          <div class="modal-hero-overlay">
+            <span class="hero-badge">
+              <i class="bi bi-camera-fill me-1"></i>Fotografía del daño
+            </span>
+          </div>
+        </div>
+      } @else {
+        <div class="modal-hero modal-hero--empty">
+          <i class="bi bi-image bi-hero-icon"></i>
+          <span>Sin fotografía adjunta</span>
+        </div>
+      }
+
+      <!-- Cuerpo -->
+      <div class="modal-body">
+
+        <!-- Descripción destacada -->
+        <div class="detalle-descripcion">
+          <p class="detalle-desc-texto">
+            {{ reporteVista()!.descripcion || 'Sin descripción registrada.' }}
+          </p>
+        </div>
+
+        <!-- Grid de metadatos -->
+        <div class="detalle-meta-grid">
+
+          <div class="meta-item">
+            <div class="meta-icon-wrap meta-icon-wrap--via">
+              <i class="bi bi-signpost-2-fill"></i>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Vía asignada</span>
+              @if (reporteVista()!.idVia) {
+                <span class="meta-valor">
+                  <span class="geo-chip geo-chip--sm">Vía #{{ reporteVista()!.idVia }}</span>
+                </span>
+              } @else {
+                <span class="meta-valor meta-valor--muted">Sin vía asignada</span>
+              }
+            </div>
+          </div>
+
+          <div class="meta-item">
+            <div class="meta-icon-wrap meta-icon-wrap--fecha">
+              <i class="bi bi-calendar3"></i>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Fecha de registro</span>
+              <span class="meta-valor">{{ reporteVista()!.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+              <span class="meta-sub">{{ reporteVista()!.fechaCreacion | date:'HH:mm' }} hrs</span>
+            </div>
+          </div>
+
+          <div class="meta-item">
+            <div class="meta-icon-wrap meta-icon-wrap--usuario">
+              <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Reportado por</span>
+              <span class="meta-valor">Usuario #{{ reporteVista()!.idUsuario }}</span>
+            </div>
+          </div>
+
+          <div class="meta-item">
+            <div class="meta-icon-wrap meta-icon-wrap--estado">
+              <i class="bi bi-flag-fill"></i>
+            </div>
+            <div class="meta-content">
+              <span class="meta-label">Estado actual</span>
+              <span class="meta-valor">
+                <span class="badge-estado badge-{{ reporteVista()!.estado | lowercase }}">
+                  <span class="badge-dot"></span>{{ etiquetaEstado(reporteVista()!.estado) }}
+                </span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer modal-footer--vista">
+        <button class="btn-cancelar" (click)="cerrarVista()">
+          <i class="bi bi-x me-1"></i>Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+
+<!-- ══ MODAL CONFIRMAR ELIMINAR ═══════════════════════════════════════ -->
+@if (reporteAEliminar()) {
+  <div class="modal-overlay" (click)="cancelarEliminar()">
+    <div class="modal-panel modal-panel--confirm" (click)="$event.stopPropagation()">
+      <div class="confirm-body">
+        <div class="confirm-icon">
+          <i class="bi bi-trash3-fill"></i>
+        </div>
+        <h3 class="confirm-titulo">Eliminar reporte</h3>
+        <p class="confirm-texto">
+          ¿Estás seguro de que querés eliminar el reporte
+          <strong>#{{ reporteAEliminar()!.idReporte }}</strong>?
+          Esta acción no se puede deshacer.
+        </p>
+        @if (reporteAEliminar()!.descripcion) {
+          <span class="confirm-desc-chip">
+            "{{ reporteAEliminar()!.descripcion }}"
+          </span>
+        }
+      </div>
+      <div class="confirm-footer">
+        <button class="btn-cancelar" (click)="cancelarEliminar()">
+          Cancelar
+        </button>
+        <button class="btn-eliminar-confirm" [disabled]="eliminando()" (click)="ejecutarEliminar()">
+          @if (eliminando()) {
+            <span class="spinner-border spinner-border-sm me-1"></span>Eliminando…
+          } @else {
+            <i class="bi bi-trash3 me-1"></i>Sí, eliminar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+@if (reporteSeleccionado()) {
+  <div class="modal-overlay" (click)="cerrarDetalle()">
+    <div class="modal-panel modal-panel--editar" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="mh-left">
+          <span class="mh-eyebrow">Editar reporte</span>
+          <h2 class="mh-titulo">Reporte #{{ reporteSeleccionado()!.idReporte }}</h2>
+        </div>
+        <button class="modal-cerrar" (click)="cerrarDetalle()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Body dos columnas -->
+      <div class="editar-layout">
+
+        <!-- Columna izquierda: imagen + info -->
+        <div class="editar-col-izq">
+          @if (reporteSeleccionado()!.imagenUrl) {
+            <img [src]="reporteSeleccionado()!.imagenUrl"
+                 class="editar-hero-img"
+                 alt="Foto reporte"
+                 (error)="onImgError($event)" />
+          } @else {
+            <div class="editar-hero-img editar-hero-img--empty">
+              <i class="bi bi-image"></i>
+            </div>
+          }
+          <div class="editar-info-row">
+            <span class="editar-meta-chip">
+              <i class="bi bi-calendar3"></i>{{ reporteSeleccionado()!.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+            @if (reporteSeleccionado()!.idVia) {
+              <span class="editar-meta-chip">
+                <i class="bi bi-signpost-2-fill"></i>Vía #{{ reporteSeleccionado()!.idVia }}
+              </span>
+            }
+            <span class="editar-meta-chip">
+              <i class="bi bi-person"></i>Usuario #{{ reporteSeleccionado()!.idUsuario }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Columna derecha: estado -->
+        <div class="editar-col-der">
+          <p class="editar-desc-texto">{{ reporteSeleccionado()!.descripcion || 'Sin descripción' }}</p>
+
+          <!-- Estado actual -->
+          <div class="editar-seccion">
+            <span class="editar-seccion-label">Estado actual</span>
+            <div class="editar-estado-actual">
+              <span class="badge-estado badge-{{ reporteSeleccionado()!.estado | lowercase }} badge-estado--lg">
+                <span class="badge-dot"></span>{{ etiquetaEstado(reporteSeleccionado()!.estado) }}
+              </span>
+              @if (nuevoEstado() !== reporteSeleccionado()!.estado) {
+                <i class="bi bi-arrow-right editar-arrow"></i>
+                <span class="badge-estado badge-{{ nuevoEstado() | lowercase }} badge-estado--lg badge-estado--nuevo">
+                  <span class="badge-dot"></span>{{ etiquetaEstado(nuevoEstado()) }}
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- Seleccionar nuevo estado -->
+          <div class="editar-seccion">
+            <span class="editar-seccion-label">Seleccionar nuevo estado</span>
+            <div class="estado-opciones-grid">
+              @for (op of estadosCambio; track op.valor) {
+                <label class="estado-card" [class.selected]="nuevoEstado() === op.valor"
+                       [class.estado-card--current]="op.valor === reporteSeleccionado()!.estado">
+                  <input type="radio" [value]="op.valor" [checked]="nuevoEstado() === op.valor"
+                         (change)="nuevoEstado.set(op.valor)" />
+                  <span class="estado-card-dot estado-dot-{{ op.valor | lowercase }}"></span>
+                  <span class="estado-card-label">{{ op.etiqueta }}</span>
+                  @if (op.valor === reporteSeleccionado()!.estado) {
+                    <span class="estado-card-current-tag">Actual</span>
+                  }
+                  @if (nuevoEstado() === op.valor && op.valor !== reporteSeleccionado()!.estado) {
+                    <i class="bi bi-check2 estado-card-check"></i>
+                  }
+                </label>
+              }
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn-cancelar" (click)="cerrarDetalle()">Cancelar</button>
+        <button class="btn-guardar"
+                [disabled]="guardandoEstado() || nuevoEstado() === reporteSeleccionado()!.estado"
+                (click)="guardarEstado()">
+          @if (guardandoEstado()) {
+            <span class="spinner-border spinner-border-sm me-1"></span>Guardando…
+          } @else {
+            <i class="bi bi-check2 me-1"></i>Guardar cambio
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+
+<!-- ══ MODAL NUEVO REPORTE ════════════════════════════════════════════ -->
+@if (mostrarModalNuevo()) {
+  <div class="modal-overlay" (click)="cerrarModalNuevo()">
+    <div class="modal-panel modal-panel--nuevo" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="mh-left">
+          <span class="mh-eyebrow">Prueba de registro</span>
+          <h2 class="mh-titulo">Nuevo reporte de daño</h2>
+        </div>
+        <button class="modal-cerrar" (click)="cerrarModalNuevo()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Body en dos columnas -->
+      <div class="nuevo-layout">
+
+        <!-- ═══ COLUMNA IZQUIERDA — Preview ═══ -->
+        <div class="nuevo-preview-col">
+
+          <!-- Zona de preview -->
+          <div class="preview-zona"
+               [class.preview-zona--ok]="previewEstado() === 'ok'"
+               [class.preview-zona--error]="previewEstado() === 'error'"
+               [class.preview-zona--cargando]="previewEstado() === 'cargando'">
+
+            @switch (previewEstado()) {
+
+              @case ('vacio') {
+                <div class="preview-placeholder">
+                  <div class="preview-placeholder-icon">
+                    <i class="bi bi-image"></i>
+                  </div>
+                  <p class="preview-placeholder-titulo">Vista previa</p>
+                  <p class="preview-placeholder-sub">Ingresa una URL de imagen para verla aquí</p>
+                </div>
+              }
+
+              @case ('cargando') {
+                <div class="preview-placeholder">
+                  <div class="preview-spinner">
+                    <div class="spinner-border" style="width:2rem;height:2rem;border-width:2px"></div>
+                  </div>
+                  <p class="preview-placeholder-sub">Cargando imagen…</p>
+                </div>
+              }
+
+              @case ('ok') {
+                <img class="preview-img"
+                     [src]="nuevoForm.imagenUrl"
+                     alt="Vista previa del reporte" />
+                <div class="preview-ok-badge">
+                  <i class="bi bi-check-circle-fill me-1"></i>Imagen válida
+                </div>
+              }
+
+              @case ('error') {
+                <div class="preview-placeholder preview-placeholder--error">
+                  <div class="preview-error-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                  </div>
+                  <p class="preview-placeholder-titulo">No se pudo cargar</p>
+                  <p class="preview-placeholder-sub">Verifica que la URL sea pública y correcta</p>
+                </div>
+              }
+
+            }
+          </div>
+
+          <!-- Input URL debajo de la preview -->
+          <div class="form-group" style="margin-top: 10px;">
+            <label class="form-label">
+              <i class="bi bi-link-45deg me-1"></i>URL de imagen
+              <span class="form-required">*</span>
+            </label>
+            <div class="url-input-wrap">
+              <input class="form-input url-input"
+                     type="url"
+                     placeholder="https://ejemplo.com/foto.jpg"
+                     [(ngModel)]="nuevoForm.imagenUrl"
+                     (ngModelChange)="onUrlChange()" />
+              @if (nuevoForm.imagenUrl) {
+                <button class="url-clear-btn" (click)="limpiarUrlImagen()" title="Limpiar URL">
+                  <i class="bi bi-x"></i>
+                </button>
+              }
+            </div>
+            <!-- Indicador de estado bajo el input -->
+            <div class="url-estado-row">
+              @switch (previewEstado()) {
+                @case ('ok')      { <span class="url-status url-status--ok"><i class="bi bi-check-circle-fill"></i>Imagen cargada correctamente</span> }
+                @case ('error')   { <span class="url-status url-status--error"><i class="bi bi-x-circle-fill"></i>URL inválida o sin acceso</span> }
+                @case ('cargando'){ <span class="url-status url-status--loading"><i class="bi bi-hourglass-split"></i>Verificando…</span> }
+                @default          { <span class="form-hint">URL pública de la fotografía del daño.</span> }
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ═══ COLUMNA DERECHA — Formulario ═══ -->
+        <div class="nuevo-form-col">
+
+          <!-- Aviso de contexto -->
+          <div class="nuevo-aviso">
+            <i class="bi bi-flask nuevo-aviso-icon"></i>
+            <span>Formulario de prueba. En producción el ciudadano reporta desde el celular.</span>
+          </div>
+
+          <!-- Descripción -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-chat-left-text me-1"></i>Descripción
+            </label>
+            <textarea class="form-textarea"
+                      rows="4"
+                      placeholder="Describe brevemente el daño vial observado…"
+                      [(ngModel)]="nuevoForm.descripcion"></textarea>
+          </div>
+
+          <!-- Vía -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-signpost-2 me-1"></i>Vía
+            </label>
+            <select class="form-input"
+                    [(ngModel)]="nuevoForm.idVia">
+              <option [ngValue]="null">— Sin vía asignada —</option>
+              @for (via of vias(); track via.idVia) {
+                <option [ngValue]="via.idVia">
+                  {{ via.codigoSegmento }} — {{ via.nombreVia }}
+                </option>
+              }
+            </select>
+            <span class="form-hint">Seleccioná la vía afectada.</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn-cancelar" (click)="cerrarModalNuevo()">Cancelar</button>
+        <button class="btn-guardar"
+                [disabled]="guardandoNuevo() || !nuevoForm.imagenUrl.trim() || previewEstado() === 'error'"
+                (click)="guardarNuevo()">
+          @if (guardandoNuevo()) {
+            <span class="spinner-border spinner-border-sm me-1"></span>Registrando…
+          } @else {
+            <i class="bi bi-plus-lg me-1"></i>Registrar reporte
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

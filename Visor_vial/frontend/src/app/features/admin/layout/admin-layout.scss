@@ -1,0 +1,231 @@
+// ── Tokens del sistema de diseño Synthevia ──────────────────────────────────
+$color-primary:        #1a544a;
+$color-primary-active: #143f37;
+$color-primary-light:  #d4e8e3;
+$color-canvas:         #f0f4f3;
+$color-surface:        #ffffff;
+$color-ink:            #1c2b27;
+$color-body:           #3d5450;
+$color-muted:          #6b8a85;
+$color-hairline:       #dde8e6;
+$color-sidebar-bg:     #0f2e28;
+$color-sidebar-hover:  rgba(255,255,255,0.07);
+$color-sidebar-active: rgba(255,255,255,0.13);
+
+// Sidebar
+$sidebar-width:          240px;
+$sidebar-width-collapsed: 64px;
+$topbar-height:          60px;
+
+// ── Shell principal ──────────────────────────────────────────────────────────
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+  background: $color-canvas;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────────────────────────
+.sidebar {
+  width: $sidebar-width;
+  background: $color-sidebar-bg;
+  color: rgba(255,255,255,0.85);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: width 0.25s ease;
+  overflow: hidden;
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    min-height: $topbar-height;
+
+    .brand-icon {
+      font-size: 1.4rem;
+      color: #6ee5c5;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #ffffff;
+      white-space: nowrap;
+    }
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+  }
+
+  .sidebar-footer {
+    padding: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+    cursor: pointer;
+    white-space: nowrap;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+
+    &:hover {
+      background: $color-sidebar-hover;
+      color: #ffffff;
+    }
+
+    &.activo {
+      background: $color-sidebar-active;
+      color: #6ee5c5;
+    }
+
+    &.btn-cerrar {
+      color: rgba(255,255,255,0.5);
+      &:hover { color: #f87171; background: rgba(248,113,113,0.1); }
+    }
+  }
+
+  .nav-icon {
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+  }
+
+  .nav-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ── Estado colapsado ─────────────────────────────────────────────────────────
+.admin-shell.sidebar-colapsado {
+  .sidebar {
+    width: $sidebar-width-collapsed;
+  }
+  .main-area {
+    margin-left: $sidebar-width-collapsed;
+  }
+}
+
+// ── ÁREA PRINCIPAL ───────────────────────────────────────────────────────────
+.main-area {
+  margin-left: $sidebar-width;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.25s ease;
+  min-width: 0;
+}
+
+// ── TOPBAR ───────────────────────────────────────────────────────────────────
+.topbar {
+  height: $topbar-height;
+  background: $color-surface;
+  border-bottom: 1px solid $color-hairline;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+
+  .topbar-toggle {
+    background: none;
+    border: none;
+    color: $color-muted;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    &:hover { background: $color-canvas; color: $color-ink; }
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: $color-primary-light;
+    color: $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: $color-ink;
+    }
+    .user-rol {
+      font-size: 0.7rem;
+    }
+  }
+}
+
+// ── BADGE ROL ────────────────────────────────────────────────────────────────
+.badge-rol {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: $color-primary-light;
+  color: $color-primary;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+// ── CONTENIDO DE PÁGINA ──────────────────────────────────────────────────────
+.page-content {
+  flex: 1;
+  padding: 28px 28px;
+  overflow-y: auto;
+}

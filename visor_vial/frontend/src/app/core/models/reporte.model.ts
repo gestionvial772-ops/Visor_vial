@@ -6,7 +6,6 @@ export interface Reporte{
     idUsuario: number,
     idVia: number | null,
     reporteOriginalId: string | null,
-    esPreprueba: boolean;
     imagenUrl: string,
     descripcion: string | null,
     estado: Estado;

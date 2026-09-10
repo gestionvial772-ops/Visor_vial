@@ -14,19 +14,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Sin estado: los tokens JWT de Supabase autentican cada request
+            .cors(cors -> {})
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
             .authorizeHttpRequests(auth -> auth
-                // Endpoints públicos (ajustar según la app)
+                // Endpoints públicos
                 .requestMatchers("/actuator/health", "/public/**").permitAll()
-                .anyRequest().authenticated()
-            )
-
-            // Valida JWTs firmados por Supabase usando el JWKS endpoint
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> {}) // configuración tomada de application.properties
+                // Panel admin — abierto mientras se integra JWT (TODO: cambiar a .hasRole("ADMIN"))
+                .requestMatchers("/admin/**").permitAll()
+                .anyRequest().permitAll()
             )
 
             .httpBasic(httpBasic -> httpBasic.disable())

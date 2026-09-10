@@ -1,0 +1,203 @@
+<!-- ══ BIENVENIDA ═══════════════════════════════════════════════════════ -->
+<div class="page-header-card">
+  <div class="page-header-icon">
+    <i class="bi bi-person-fill"></i>
+  </div>
+  <div class="page-header-text">
+    <h1 class="page-title">{{ saludo }}, {{ session.usuario()?.nombre }}</h1>
+    <p class="page-subtitle">Panel administrativo · La Esperanza, Trujillo</p>
+  </div>
+  <a routerLink="/admin/reportes" class="btn-header">
+    <i class="bi bi-clipboard2-check"></i>
+    <span>Ver reportes</span>
+  </a>
+</div>
+
+<!-- ══ MÉTRICAS CLAVE ═════════════════════════════════════════════════ -->
+@if (estadisticas()) {
+  <div class="metrics-row">
+
+    <div class="metric-card">
+      <div class="metric-icon metric-icon--rojo">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <div class="metric-body">
+        <span class="metric-valor">{{ estadisticas()!.pendientes }}</span>
+        <span class="metric-label">Sin atención</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon metric-icon--azul">
+        <i class="bi bi-gear-wide-connected"></i>
+      </div>
+      <div class="metric-body">
+        <span class="metric-valor">{{ estadisticas()!.enProceso }}</span>
+        <span class="metric-label">En gestión</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon metric-icon--verde">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <div class="metric-body">
+        <span class="metric-valor">{{ estadisticas()!.resueltos }}</span>
+        <span class="metric-label">Resueltos</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon metric-icon--verde-oscuro">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+      <div class="metric-body">
+        <span class="metric-valor">{{ porcentajeAtencion }}%</span>
+        <span class="metric-label">Atendidos</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon metric-icon--naranja">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div class="metric-body">
+        <span class="metric-valor metric-valor--sm">{{ tiempoUltimoReporte }}</span>
+        <span class="metric-label">Última actividad</span>
+      </div>
+    </div>
+
+  </div>
+}
+
+<!-- ══ CONTENIDO PRINCIPAL ═══════════════════════════════════════════ -->
+<div class="dashboard-grid">
+
+  <!-- Columna izquierda -->
+  <div class="grid-col-left">
+
+    <!-- Módulos -->
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-grid-3x3-gap-fill card-header-icon"></i>
+        <span class="card-header-titulo">Módulos del sistema</span>
+      </div>
+      <div class="card-body">
+        <div class="modulos-lista">
+          @for (m of modulos; track m.ruta) {
+            <a [routerLink]="m.ruta" class="modulo-item">
+              <div class="modulo-icon modulo-icon--{{ m.color }}">
+                <i class="bi {{ m.icono }}"></i>
+              </div>
+              <div class="modulo-texto">
+                <span class="modulo-titulo">{{ m.titulo }}</span>
+                <span class="modulo-desc">{{ m.desc }}</span>
+              </div>
+              <i class="bi bi-chevron-right modulo-flecha"></i>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-lightning-charge-fill card-header-icon"></i>
+        <span class="card-header-titulo">Accesos rápidos</span>
+      </div>
+      <div class="card-body">
+        <div class="accesos-grid">
+          @for (a of accesosRapidos; track a.label) {
+            <a [routerLink]="a.ruta" class="acceso-btn {{ a.color }}">
+              <i class="bi {{ a.icono }}"></i>
+              <span>{{ a.label }}</span>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Columna derecha -->
+  <div class="grid-col-right">
+
+    <!-- Últimas incidencias -->
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-clock-history card-header-icon"></i>
+        <span class="card-header-titulo">Últimas incidencias</span>
+        <a routerLink="/admin/reportes" class="card-header-link">Ver todas</a>
+      </div>
+      <div class="card-body card-body--flush">
+        @if (cargando()) {
+          <div class="card-estado">
+            <div class="spinner-border text-secondary" style="width:1.5rem;height:1.5rem"></div>
+          </div>
+        } @else if (recientes().length === 0) {
+          <div class="card-estado">
+            <i class="bi bi-inbox text-muted fs-3"></i>
+            <span>No hay reportes aún.</span>
+          </div>
+        } @else {
+          <div class="incidencias-lista">
+            @for (r of recientes(); track r.idReporte) {
+              <div class="incidencia-fila">
+                @if (r.imagenUrl) {
+                  <img [src]="r.imagenUrl" class="incidencia-thumb" alt="" />
+                } @else {
+                  <div class="incidencia-thumb incidencia-thumb--ph">
+                    <i class="bi bi-image"></i>
+                  </div>
+                }
+                <div class="incidencia-info">
+                  <span class="incidencia-desc">{{ r.descripcion || 'Sin descripción' }}</span>
+                  <span class="incidencia-meta">
+                    <span class="incidencia-id">#{{ r.idReporte }}</span>
+                    &middot;
+                    {{ r.fechaCreacion | date:'dd/MM HH:mm' }}
+                  </span>
+                </div>
+                <span class="badge-estado badge-{{ r.estado | lowercase }}">
+                  <span class="badge-dot"></span>
+                  {{ etiquetaEstado(r.estado) }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Info del sistema -->
+    <div class="card card--info">
+      <div class="card-header">
+        <i class="bi bi-info-circle card-header-icon"></i>
+        <span class="card-header-titulo">Sistema</span>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Versión</span>
+            <span class="info-valor">1.0.0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Entorno</span>
+            <span class="info-valor info-valor--badge">Desarrollo</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Ubicación</span>
+            <span class="info-valor">La Esperanza, Trujillo</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Sesión</span>
+            <span class="info-valor">{{ session.usuario()?.nombre || '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
