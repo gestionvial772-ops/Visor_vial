@@ -1,0 +1,443 @@
+FACULTAD DE INGENIERÍA
+Carrera de Ingeniería de Sistemas Computacionales
+“Implementación de un sistema web para optimizar la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026”
+
+Tesis para optar al título profesional de: Bachiller en Ingeniería de Sistemas Computacionales
+
+Autores:
+
+DOMINGUEZ TERRONES, JERSON MANUEL
+GIL CABANILLAS, FABRICIO RONALDO
+GOICOCHEA SALDAÑA, JOAQUIN ALEJANDRO
+
+Asesor:
+
+Mg. Lic. CHRISTIAN DAVID PIZARRO MONCADA
+Código ORCID
+Trujillo - Perú
+2026
+JURADO EVALUADOR
+
+
+
+Jurado 1
+Presidente(a)
+
+
+Nombre y Apellidos
+
+
+
+Jurado 2
+
+
+Nombre y Apellidos
+
+
+
+Jurado 3
+
+
+Nombre y Apellidos
+
+
+		
+
+
+
+
+Informe de Similitud
+(Copie y pegue como imagen la hoja del reporte global)
+
+
+
+
+
+
+
+Dedicatoria
+
+
+
+
+
+
+
+
+
+Agradecimiento
+
+
+
+
+
+
+
+Tabla de contenidos
+JURADO EVALUADOR	2
+INFORME DE SIMILITUD	3
+DEDICATORIA	4
+AGRADECIMIENTO	5
+ÍNDICE DE TABLAS	7
+ÍNDICE DE FIGURAS	8
+RESUMEN	9
+CAPÍTULO I: INTRODUCCIÓN	10
+CAPÍTULO II: METODOLOGÍA	12
+CAPÍTULO III: RESULTADOS	13
+CAPÍTULO IV: DISCUSIÓN Y CONCLUSIONES	15
+REFERENCIAS	16
+ANEXOS	17
+
+
+Índice de tablas
+
+
+
+
+
+
+
+
+
+
+
+
+
+Índice de Figuras
+
+
+
+
+
+
+
+
+Resumen
+Palabras Claves
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CAPÍTULO I: INTRODUCCIÓN
+1.1 Realidad problemática 
+La conservación de la infraestructura vial constituye una actividad fundamental para garantizar condiciones adecuadas de movilidad, seguridad y funcionamiento de las ciudades. Sin embargo, la identificación oportuna de deterioros en los pavimentos representa un desafío para las entidades responsables de su mantenimiento, debido a que los procedimientos convencionales de inspección dependen, en gran medida, de recorridos de campo, observación directa y posterior procesamiento de la información recopilada. Shang et al. (2024) y Sholevar et al. (2022) señalan que estos procedimientos pueden demandar cantidades considerables de tiempo y recursos humanos, además de encontrarse sujetos a errores asociados con la inspección y valoración manual, circunstancia que ha impulsado el desarrollo de métodos automatizados de adquisición y procesamiento de información vial 
+Esta problemática no se limita a la detección física de un deterioro, sino que comprende también la manera en que la información referente a la incidencia es registrada, localizada, clasificada y puesta a disposición para su posterior gestión. En este contexto, los mecanismos de colaboración ciudadana y crowdsourcing han adquirido relevancia como fuentes complementarias de información vial. Gu et al. (2024), mediante el análisis de un año de reportes de baches generados por usuarios de Waze en cinco corredores viales de Nashville, demostraron que los reportes colaborativos podían identificar deterioros antes de que aparecieran solicitudes formales en el sistema de gestión de pavimentos e incluso evidenciaron zonas que no habían sido advertidas por los equipos de mantenimiento. Estos resultados muestran que la captura distribuida de información puede contribuir a disminuir la distancia temporal entre la aparición de una incidencia y su incorporación a un sistema de información para la gestión vial 
+El empleo de dispositivos móviles ha ampliado además las posibilidades de automatizar la obtención de información sobre la condición del pavimento. Zhao et al. (2024) desarrollaron un sistema de monitoreo basado en sensores de teléfonos inteligentes y un modelo de aprendizaje automático de dos etapas, mediante el cual los datos recolectados fueron transformados en información geoespacial para la identificación y clasificación de anomalías viales. El sistema fue probado utilizando teléfonos inteligentes convencionales instalados en dos vehículos y alcanzó una exactitud global del 87 % respecto de una inspección manual de referencia. Este antecedente evidencia que dispositivos de uso cotidiano pueden constituir fuentes de datos útiles para procesos automatizados de monitoreo vial 
+Paralelamente, los avances en inteligencia artificial y visión computacional han permitido trasladar parte de la evaluación visual de los pavimentos hacia modelos capaces de identificar, segmentar y clasificar deterioros a partir de imágenes. Roman-Garay et al. (2025) desarrollaron una arquitectura que integró aprendizaje profundo, visión artificial e información tridimensional para detectar y evaluar baches. A partir de un conjunto de 583 imágenes y sus respectivas nubes de puntos, el modelo obtuvo 86.8 % de exactitud, 90.01 % de precisión, 90.87 % de recall y un F1-score de 90.433 %. El sistema complementa la detección con mediciones físicas y un mecanismo de evaluación de la urgencia del mantenimiento, mostrando que la clasificación automatizada puede sustentarse en indicadores cuantificables y no únicamente en apreciaciones visuales 
+
+Dentro de esta línea, la clasificación de la severidad del deterioro resulta especialmente pertinente para el presente estudio. De Souza et al. (2025) abordaron específicamente la clasificación de baches en tres niveles de severidad baja, media y alta mediante YOLOv8, utilizando mediciones de campo para establecer las categorías de referencia. Los autores señalan que la determinación convencional de la severidad requiere procedimientos manuales y desarrollaron un enfoque automatizado orientado a reducir esa dependencia. Este antecedente demuestra que la severidad puede ser tratada como una categoría técnica susceptible de clasificación mediante inteligencia artificial, siempre que exista un criterio de referencia previamente establecido
+De manera complementaria, Rezaeimanesh et al. (2025) desarrollaron el conjunto de datos Attain para la detección y clasificación de deterioros de pavimentos. El conjunto contiene 2,293 imágenes y 19,761 instancias pertenecientes a diez categorías de deterioro, incluyendo baches, grietas, desprendimientos y otras patologías. Las fotografías fueron obtenidas mediante teléfonos inteligentes y anotadas manualmente por ingenieros especialistas en pavimentos, incorporando niveles de severidad baja, media y alta. La participación de especialistas en la construcción del conjunto de referencia resulta metodológicamente relevante, puesto que establece una separación entre la predicción producida por un modelo de inteligencia artificial y la clasificación técnica considerada como valor de contraste o Ground Truth. 
+Otro componente crítico de la gestión de una incidencia vial corresponde a su ubicación geográfica. Una incidencia incorrectamente posicionada puede disminuir la utilidad del reporte aun cuando la información visual haya sido registrada adecuadamente. No obstante, la geolocalización obtenida mediante dispositivos móviles no se encuentra exenta de errores derivados de las condiciones del entorno urbano. Weng et al. (2023) analizaron mediciones GNSS de teléfonos inteligentes en posiciones conocidas de Hong Kong y determinaron que el 92.5 % de los valores atípicos del código procedían de señales sin línea de vista (NLOS), constituyendo estas la principal fuente de degradación del posicionamiento en su experimento. Los investigadores desarrollaron un método basado en agrupamiento para caracterizar las señales y observaron además que más del 92 % de las mediciones libres de error procedían del sector del cielo opuesto al lado de la calle ocupado por el peatón. A partir del análisis de la relación señal-ruido (SNR) y de la identificación del lado correcto de la vía, utilizaron la red peatonal como información complementaria para mejorar el posicionamiento, reduciendo el error aproximadamente de 15 m a 4.6 m. Estos resultados evidencian que la ubicación generada por un teléfono inteligente no debe considerarse exacta únicamente por producir una coordenada, sino que su calidad puede evaluarse cuantitativamente mediante el error espacial respecto de una posición conocida de referencia  
+	Lo anterior adquiere importancia en el diseño de sistemas web de reporte, debido a que herramientas cartográficas permiten representar y gestionar información espacial, sin embargo, la visualización de un punto sobre un mapa no constituye por sí misma evidencia de exactitud posicional. Por ello, la evaluación de una solución tecnológica de reporte vial requiere distinguir entre la funcionalidad de mostrar una posición geográfica y la exactitud espacial de dicha posición, siendo esta última cuantificable mediante la distancia, expresada en metros, respecto de una coordenada considerada como referencia
+	En el contexto de Trujillo, el deterioro de la infraestructura vial constituye una problemática reconocida por las propias entidades gubernamentales. En julio de 2024, la Municipalidad Provincial de Trujillo informó que la superficie e infraestructura vial de la ciudad presentaban un marcado deterioro y estimó que la brecha requerida para atender la problemática ascendía, al menos, a S/ 1,000 millones. La entidad relacionó parte de esta situación con daños acumulados y fenómenos climatológicos ocurridos durante los años anteriores (Municipalidad Provincial de Trujillo, 2024). 
+Posteriormente, en abril de 2026, la Municipalidad Provincial de Trujillo estimó que serían necesarios aproximadamente S/ 2,000 millones para renovar el asfaltado de la ciudad y comunicó que durante ese año se habían destinado cerca de S/ 75 millones a la atención de avenidas y calles consideradas en estado crítico. Estas cifras reflejan la magnitud de las necesidades de intervención existentes en la red vial de la provincia y la importancia de disponer de información que contribuya a identificar y caracterizar los deterioros que requieren atención (Municipalidad Provincial de Trujillo, 2026)
+Desde el ámbito académico local, Cruz Flores (2023) realizó una evaluación de la carpeta asfáltica de la avenida Cahuide, ubicada en la urbanización San Pedro del distrito de La Esperanza, empleando criterios técnicos de evaluación del pavimento. Este antecedente resulta relevante porque sitúa el deterioro y la evaluación de infraestructura vial dentro del mismo espacio geográfico donde se desarrollará la presente investigación. No obstante, su orientación se concentra en la evaluación física del pavimento y no en el proceso mediante el cual una incidencia es reportada, geolocalizada, clasificada y consolidada mediante una herramienta digital
+En cuanto a los mecanismos institucionales de interacción con la ciudadanía, la Municipalidad Distrital de La Esperanza dispone públicamente de canales generales como correo electrónico, mesa de partes, central telefónica, call center de atención al ciudadano y formulario de contacto. La existencia de estos canales no constituye por sí misma evidencia de ineficiencia, por lo que no corresponde afirmar anticipadamente que presenten mayores tiempos o errores que un sistema especializado. Sin embargo, sí permite identificar una oportunidad investigable: determinar cuantitativamente si un mecanismo específicamente diseñado para el reporte de incidencias viales puede modificar indicadores objetivos del proceso frente a un procedimiento convencional de registro (Municipalidad Distrital de La Esperanza, s. f.). 
+A partir de los antecedentes revisados se observa que la investigación reciente ha abordado diferentes componentes del problema. Por una parte, existen estudios orientados al monitoreo colaborativo y a la obtención de información vial mediante dispositivos móviles (Gu et al., 2024; Staniek, 2021; Zhao et al., 2024). Por otra, se han desarrollado modelos de inteligencia artificial destinados a detectar, segmentar y clasificar deterioros del pavimento utilizando métricas como accuracy, precision, recall, F1-score e IoU (Roman-Garay et al., 2025; de Souza et al., 2025; Rezaeimanesh et al., 2025). Asimismo, las investigaciones sobre posicionamiento mediante teléfonos inteligentes muestran la necesidad de expresar la exactitud geográfica en términos de error respecto de una ubicación independiente de referencia (Weng et al., 2023). 
+Sin embargo, en las fuentes revisadas para la presente investigación no se identificó un estudio desarrollado en el distrito de La Esperanza que evalúe de manera integrada el efecto de un sistema web sobre el proceso de gestión del reporte de incidencias viales mediante indicadores de tiempo de procesamiento, error espacial de geolocalización y exactitud de clasificación de la severidad del deterioro. Esta constituye la brecha específica que orienta el estudio. La investigación no pretende demostrar que la implementación del sistema repara o disminuye físicamente los deterioros existentes, puesto que dicha intervención corresponde a las entidades responsables del mantenimiento vial; lo que se pretende determinar es si la incorporación del sistema optimiza el proceso de generación y tratamiento de la información asociada al reporte.
+Variable independiente
+La variable independiente corresponde a la implementación del sistema web, entendida como la incorporación de una plataforma tecnológica destinada a centralizar el registro y procesamiento de información relacionada con incidencias en infraestructura vial. En el presente estudio, esta variable constituye la intervención aplicada sobre el proceso convencional de gestión del reporte. Las investigaciones recientes evidencian la viabilidad de integrar plataformas web, información geoespacial e inteligencia artificial para el monitoreo y tratamiento de información vial (Urbiztondo et al., 2025; Martínez-Vargas et al., 2022). 
+En conjunto, los antecedentes permiten identificar tres aspectos cuantificables relevantes para la gestión del reporte de incidencias viales: la eficiencia temporal del proceso, evaluada mediante el tiempo requerido para registrar y procesar el reporte; la exactitud de geolocalización, determinada a partir del error espacial de la ubicación registrada respecto de una posición de referencia; y la exactitud en la clasificación de la severidad del deterioro vial respecto de una clasificación técnica de referencia. Estos aspectos constituyen la base para la definición de las dimensiones evaluadas en la presente investigación. 
+D1=eficiencia temporal,   D2=exactitud de geolocalización,  D3=exactitud de clasificaci 
+Variable dependiente
+La variable dependiente corresponde a la gestión del reporte de incidencias en infraestructura vial, entendida como el proceso mediante el cual la información de una incidencia es registrada, localizada, caracterizada, clasificada y consolidada para su utilización posterior. Su evaluación se realizará mediante tres dimensiones cuantificables: eficiencia temporal, expresada mediante el tiempo requerido para procesar el reporte; exactitud de geolocalización, determinada mediante el error espacial respecto de una posición de referencia; y exactitud de clasificación de la severidad, determinada mediante el grado de correspondencia de las clasificaciones obtenidas en el procedimiento tradicional y mediante el sistema web respecto de una clasificación técnica de referencia.  
+O1→ X→ O2  
+Por tanto necesitamos: 
+	Clasificación tradicional -> GT ClasificacionTradicional -> GT
+	Clasificación IA-> GT ClasificacionIA -> GT
+
+
+De esta manera, la investigación propone evaluar el aporte del sistema web no únicamente desde su funcionamiento tecnológico, sino mediante evidencia cuantitativa acerca de sus efectos sobre el proceso de gestión del reporte. Ello permitirá establecer si la incorporación de mecanismos automatizados de registro, geolocalización e inteligencia artificial constituye una alternativa capaz de generar información vial de forma más eficiente, espacialmente exacta y técnicamente clasificable dentro del contexto del distrito de La Esperanza, Trujillo, durante el año 2026. 
+1.2 Formulación del problema 
+
+Pregunta principal:
+¿En qué medida la implementación de un sistema web optimiza la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026? 
+Preguntas secundarias:
+¿En qué medida la implementación de un sistema web mejora la eficiencia temporal de la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026? 
+¿En qué medida la implementación de un sistema web mejora la exactitud de geolocalización en la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026? 
+¿En qué medida la implementación de un sistema web mejora la exactitud de clasificación de la severidad de los deterioros viales en la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026? 
+
+
+1.3 Objetivos
+Objetivo general:
+Determinar en qué medida la implementación de un sistema web optimiza la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026. 
+
+Objetivos específicos:
+Determinar en qué medida la implementación de un sistema web mejora la eficiencia temporal de la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026
+Determinar en qué medida la implementación de un sistema web mejora la exactitud de geolocalización en la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026.
+Determinar en qué medida la implementación de un sistema web mejora la exactitud de clasificación de la severidad de los deterioros viales en la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo,  2026
+1.4 Hipótesis
+Hipótesis general:
+La implementación de un sistema web optimiza significativamente la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo,  2026
+Hipótesis específicas:
+La implementación de un sistema web mejora significativamente la eficiencia temporal de la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026
+La implementación de un sistema web mejora significativamente la exactitud de geolocalización en la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026
+La implementación de un sistema web mejora significativamente la exactitud de clasificación de la severidad de los deterioros viales en la gestión del reporte de incidencias en infraestructura vial en el distrito de La Esperanza, Trujillo, 2026
+
+CAPÍTULO II: METODOLOGÍA
+Enfoque
+La investigación se desarrolla bajo un enfoque cuantitativo, debido a que analiza el efecto de la implementación de un sistema web mediante la obtención y comparación de datos numéricos asociados con la gestión del reporte de incidencias en infraestructura vial. Las mediciones comprenden el tiempo de procesamiento del reporte expresado en segundos, el error espacial de geolocalización expresado en metros y la exactitud de clasificación de la severidad del deterioro vial respecto de una clasificación técnica de referencia. Asimismo, las hipótesis serán sometidas a contrastación mediante procedimientos estadísticos
+De acuerdo con Hernández-Sampieri y Mendoza (2023), el enfoque cuantitativo se caracteriza por la medición de variables mediante datos numéricos y por el empleo de procedimientos estadísticos para contrastar las hipótesis formuladas.
+
+
+Tipo
+Por su finalidad, la investigación es de tipo aplicada, dado que emplea conocimientos y tecnologías de ingeniería de sistemas, desarrollo web, geolocalización e inteligencia artificial para intervenir sobre un problema concreto relacionado con la gestión del reporte de deterioros visibles en la infraestructura vial del distrito de La Esperanza, Trujillo, 2026 (Hernández-Sampieri & Mendoza, 2023). 
+Nivel y alcance
+En cuanto al nivel y alcance, la investigación es explicativa, puesto que busca determinar el efecto producido por la implementación del sistema web, considerada como variable independiente, sobre la gestión del reporte de incidencias en infraestructura vial, considerada como variable dependiente. Para ello se compararán los indicadores obtenidos antes y después de aplicar la intervención tecnológica. En este sentido, el alcance explicativo se orienta al análisis de relaciones de causa y efecto entre variables, lo cual resulta coherente con el propósito del presente estudio (Hernández-Sampieri & Mendoza, 2023). 
+
+Diseño
+El diseño de la investigación es preexperimental de un solo grupo con preprueba y posprueba, de acuerdo con el criterio metodológico establecido para el estudio. Este diseño corresponde a una estructura de preprueba y posprueba aplicada sobre un solo grupo, en la cual se efectúa una medición previa, se introduce la intervención y posteriormente se realiza una nueva medición sobre las mismas unidades de análisis (Hernández-Sampieri & Mendoza, 2023).
+En correspondencia con este diseño, se efectuarán mediciones iniciales mediante el procedimiento convencional de gestión del reporte (O₁); posteriormente, se aplicará la intervención correspondiente a la implementación y utilización del sistema web (X); y, finalmente, se realizarán nuevamente las mediciones sobre las mismas unidades de análisis mediante el sistema web (O₂). La representación del diseño es la siguiente:
+G 	 O1   ​	X 	 O2​ 
+G: grupo de estudio constituido por los 30 segmentos viales seleccionados.
+O1: medición de los indicadores mediante el procedimiento tradicional.
+X: implementación y utilización del sistema web.
+O2: medición de los mismos indicadores mediante el sistema web.
+Cada segmento vial generará, un par de observaciones comparables para los indicadores que correspondan al diseño preprueba-posprueba. 
+
+Unidad de análisis
+La unidad de análisis está constituida por cada segmento de infraestructura vial pública que presente un deterioro visible susceptible de ser registrado mediante el procedimiento de reporte estudiado.
+Para efectos del presente estudio, las incidencias consideradas corresponden exclusivamente a deterioros visibles de la superficie de vías públicas pavimentadas, incluyendo manifestaciones como baches y deformaciones. Para efectos del experimento, En cada segmento seleccionado se considerará una única incidencia representada por un deterioro visible de la superficie vial, sobre la cual se realizarán las mediciones correspondientes a O1 y O2.
+
+Población
+La población objetivo está conformada por los segmentos de vías públicas pavimentadas del distrito de La Esperanza, Trujillo, que presenten deterioros visibles en la superficie vial durante el periodo de ejecución del estudio. Se consideran dentro de esta población aquellos deterioros susceptibles de ser reportados y clasificados según su nivel de severidad, incluyendo manifestaciones visibles como baches, deformaciones u otros deterioros de la superficie de rodadura contemplados por el sistema. 
+Debido a que la cantidad de segmentos que pueden presentar deterioro varía con el tiempo y no se dispone de un marco muestral permanente y actualizado, se empleará un muestreo no probabilístico por conveniencia.
+
+Muestra
+La muestra estará conformada por 30 segmentos de vías públicas pavimentadas del distrito de La Esperanza que presenten deterioros visibles y cumplan con los criterios de inclusión establecidos. La selección se realizará mediante muestreo no probabilístico por conveniencia, considerando la accesibilidad, seguridad y factibilidad para efectuar las mediciones experimentales. Cada segmento constituirá una unidad de análisis y será evaluado en dos momentos: antes de la implementación del sistema web (O1) y después de su implementación (O2). Por tanto, se obtendrán 30 unidades de análisis y 30 pares de mediciones O1-O2 para cada indicador evaluado. 
+Aunque el sistema web está concebido para facilitar el registro de incidencias por parte de la ciudadanía, la evaluación experimental no utilizará personas como unidades de análisis. Las pruebas serán ejecutadas por los investigadores o por un operador estandarizado, con la finalidad de mantener condiciones comparables entre O1 y O2. Por tanto, el estudio no corresponde a una investigación de percepción, satisfacción o encuesta de ciudadanos.
+Criterios de inclusión y exclusión
+Se considerarán como criterios de inclusión:
+segmentos pertenecientes a vías públicas pavimentadas;
+presencia observable de deterioro en la superficie vial;
+accesibilidad para realizar el registro fotográfico y geoespacial;
+posibilidad de realizar las mediciones correspondientes a O1 y O2;
+condiciones mínimas de conectividad necesarias para las pruebas del sistema.
+Se excluirán:
+vías privadas;
+vías no pavimentadas o trochas;
+segmentos sin deterioro observable;
+ubicaciones donde las condiciones de tránsito o seguridad imposibiliten realizar las pruebas;
+registros que no puedan completarse por fallas técnicas que impidan obtener las mediciones necesarias.
+Materiales, instrumentos y métodos 
+	Para la intervención se utilizará un sistema web desarrollado para la gestión del reporte de deterioros visibles en la infraestructura vial. La solución estará compuesta por una interfaz web desarrollada con Angular y Bootstrap, mecanismos de protección mediante reCAPTCHA, servicios de backend implementados con Spring Boot, servicios de Supabase y persistencia sobre PostgreSQL. El componente geoespacial utilizará las capacidades de geolocalización disponibles en el dispositivo cliente y herramientas cartográficas de Mapbox para la representación de la ubicación. Asimismo, el sistema incorporará un modelo entrenado de inteligencia artificial destinado a clasificar la severidad del deterioro vial en las categorías leve, moderado y severo. 
+Para conservar la independencia de la evaluación experimental, las evidencias correspondientes a los 30 segmentos que conforman la muestra no serán utilizadas para el entrenamiento o ajuste del modelo de inteligencia artificial. Estos casos serán reservados para la evaluación final del sistema. La separación entre los datos utilizados para el desarrollo del modelo y los destinados a su evaluación es coherente con estudios de clasificación automatizada de deterioros viales que distinguen las etapas de entrenamiento y prueba del modelo (de Souza et al., 2025).
+Como recursos físicos para la ejecución experimental se utilizará un teléfono inteligente con cámara y servicios de geolocalización habilitados para la captura de evidencias y coordenadas, un equipo de cómputo para el acceso a las herramientas de registro y procesamiento de datos y un cronómetro digital independiente para la medición temporal correspondiente a O1. Asimismo, para el establecimiento de la referencia geográfica se requerirá un mecanismo de posicionamiento de mayor exactitud que el dispositivo móvil evaluado. 
+Las tecnologías mencionadas constituyen los materiales tecnológicos utilizados para implementar la intervención; su rendimiento individual no constituye por sí mismo una variable de investigación. 
+Técnicas de recolección de datos
+La recolección de datos se realizará mediante observación técnica estructurada y registro instrumental. La observación técnica permitirá registrar las características de la incidencia y la clasificación manual correspondiente a O1, mientras que el registro instrumental permitirá obtener las mediciones temporales, coordenadas geográficas y resultados generados durante O1 y O2. La información obtenida será consolidada posteriormente en una ficha técnica de registro de datos. 
+Instrumento para eficiencia temporal 
+	Para la dimensión eficiencia temporal se utilizará un registro técnico de tiempos, destinado a almacenar el instante inicial y final de cada proceso de reporte. El indicador se calculará mediante: 
+T = tfin- tinicio
+y se expresará en segundos.
+	Durante la preprueba O1, el tiempo de procesamiento será medido mediante un cronómetro digital independiente del sistema web. El cronometraje se iniciará cuando comience el registro de la información de la incidencia y finalizará cuando el reporte haya sido completamente registrado mediante el procedimiento convencional. Durante O2, el tiempo será determinado mediante los registros temporales o timestamps generados por el sistema web. En ambas condiciones se utilizarán los mismos criterios de inicio y finalización, y los resultados serán expresados en segundos
+Para garantizar la comparabilidad entre ambas condiciones, los eventos establecidos como inicio y finalización del proceso de reporte serán conceptualmente equivalentes en O1 y O2. Un menor tiempo registrado representará una mayor eficiencia temporal.
+Instrumento para geolocalización 
+	Para la dimensión exactitud de geolocalización se registrarán las coordenadas asociadas a cada incidencia en las condiciones O1 y O2
+	Cada coordenada será comparada con una posición geográfica independiente de referencia o Ground Truth, previamente establecida mediante un punto de control de mayor exactitud. Para cada incidencia se establecerá un punto de captura estandarizado, seguro y próximo al deterioro, desde el cual se efectuarán las mediciones correspondientes. La coordenada técnicamente establecida para dicho punto constituirá el Ground Truth geográfico y será independiente de las posiciones obtenidas mediante O1 y O2. El empleo de una posición conocida como referencia para cuantificar el error de mediciones GNSS obtenidas mediante smartphones ha sido utilizado por Weng et al. (2023). De manera complementaria, Pan et al. (2024) evaluaron un sistema de posicionamiento basado en smartphones utilizando receptores GNSS geodésicos y soluciones RTK fijas como Ground Truth, evidenciando la utilidad de emplear una referencia independiente de mayor exactitud para evaluar el posicionamiento obtenido mediante dispositivos móviles 
+El indicador estará constituido por la distancia espacial entre:
+Pi= Posición obtenida mediante el reporte
+y:
+GTi= Posición geográfica de referencia
+expresándose el resultado en metros
+Durante O1, la ubicación de la incidencia será determinada mediante un procedimiento manual no automatizado. A partir de una referencia descriptiva del lugar, el responsable del registro identificará manualmente el punto correspondiente sobre un mapa digital y se almacenarán sus coordenadas. Durante O2, la coordenada será obtenida mediante el mecanismo de geolocalización empleado por el sistema web y representada cartográficamente mediante Mapbox. Las posiciones obtenidas en ambas condiciones serán comparadas con una posición geográfica independiente de referencia o Ground Truth
+Instrumento para clasificación de severidad
+La dimensión exactitud de clasificación será evaluada mediante tres categorías:
+leve;
+moderado;
+severo.
+Para cada deterioro se establecerá una clasificación técnica de referencia o Ground Truth en las categorías leve, moderado o severo. Esta clasificación será determinada independientemente mediante criterios técnicos previamente definidos y validada por un especialista con conocimiento en infraestructura vial. El responsable de efectuar la clasificación durante O1 no tendrá acceso a la clasificación de referencia durante la prueba, con la finalidad de conservar la independencia entre ambas mediciones. El empleo de referencias técnicas independientes encuentra respaldo en de Souza et al. (2025), quienes establecieron categorías de severidad de baches mediante criterios y mediciones de campo antes de evaluar los modelos automatizados, y en Rezaeimanesh et al. (2025), cuyo conjunto de datos fue anotado manualmente por ingenieros especialistas en pavimentos incorporando niveles de severidad. 
+En la condición O1 se registrará la clasificación manual correspondiente al procedimiento tradicional. En O2 se almacenará la clasificación generada por el modelo de inteligencia artificial
+ClasificaciónO1  ↔ GT
+ClasificaciónO2  ↔ GT
+La exactitud se calculará mediante:
+Accuracy =Número de clasificaciones correctasNúmero total de clasificaciones x 100
+Registro consolidado de datos
+Se empleará una ficha técnica de registro de datos para consolidar las mediciones obtenidas en los 30 segmentos
+Campo
+Medición
+Identificador
+Segmento S01–S30
+Tiempo O1
+segundos
+Tiempo O2
+segundos
+Error espacial O1
+metros
+Error espacial O2
+metros
+Severidad Ground Truth
+leve/moderado/severo
+Clasificación O1
+leve/moderado/severo
+Clasificación O2 / IA
+leve/moderado/severo
+Acierto O1
+0/1
+Acierto O2
+0/1
+
+
+
+
+
+
+
+
+
+
+Además de los indicadores calculados, la ficha técnica conservará los datos originales necesarios para garantizar la trazabilidad de las mediciones. Para la dimensión temporal se registrarán los instantes de inicio y finalización correspondientes; para la dimensión de geolocalización se conservarán las coordenadas de latitud y longitud obtenidas en O1, O2 y en el Ground Truth; y para la clasificación se almacenarán las categorías obtenidas mediante O1, O2 y la clasificación técnica de referencia. Estos datos permitirán reconstruir y verificar posteriormente los valores utilizados en el análisis estadístico.
+Criterios de calidad de las mediciones
+
+Para asegurar la calidad del proceso de medición, la ficha técnica de recolección será revisada respecto de su correspondencia con las variables, dimensiones e indicadores establecidos. Asimismo, antes de la ejecución definitiva se realizará una prueba piloto con casos que no formen parte de los 30 segmentos de la muestra, con la finalidad de verificar el funcionamiento del protocolo, los registros temporales, la obtención de coordenadas y el almacenamiento de las clasificaciones. Durante la experimentación se procurará mantener el mismo dispositivo, procedimiento y condiciones operativas para las mediciones comparables. 
+Procedimiento 
+La investigación se desarrollará mediante las siguientes etapas. 
+Primera etapa: selección y codificación de los segmentos. Se identificarán 30 segmentos de vías públicas del distrito de La Esperanza que cumplan los criterios de inclusión. Cada unidad será identificada mediante un código único comprendido entre S01 y S30
+Segunda etapa: establecimiento de referencias técnicas. Para cada segmento se establecerá un punto de captura seguro y próximo a la incidencia, cuya coordenada independiente constituirá el Ground Truth geográfico. Asimismo, se determinará una clasificación técnica de referencia de la severidad del deterioro en las categorías leve, moderado o severo, mediante criterios previamente definidos y validada por un especialista con conocimiento en infraestructura vial. Ambas referencias serán establecidas independientemente de los resultados obtenidos posteriormente en O1 y O2
+Tercera etapa: preprueba O1.En cada uno de los segmentos seleccionados se ejecutará un procedimiento convencional estandarizado de registro manual no automatizado. El tiempo de procesamiento será medido mediante un cronómetro digital independiente, iniciándose el registro cuando comience la incorporación de la información de la incidencia y finalizando cuando el reporte quede completamente registrado. Para determinar la ubicación, el responsable recibirá una referencia descriptiva del lugar e identificará manualmente el punto correspondiente sobre un mapa digital, almacenándose las coordenadas seleccionadas. Asimismo, se realizará una clasificación manual de la severidad en las categorías leve, moderado o severo a partir de la evidencia disponible. Durante esta etapa, el operador no tendrá acceso a los valores establecidos como Ground Truth. Los resultados serán almacenados en la ficha técnica para su posterior comparación con O2
+Cuarta etapa: aplicación de la intervención X. Se utilizará el sistema web para efectuar el proceso de reporte sobre los mismos segmentos viales. 
+Quinta etapa: posprueba O2. Sobre los mismos segmentos viales se efectuará el reporte mediante el sistema web. El sistema registrará los eventos temporales definidos para determinar el tiempo de procesamiento, obtendrá la coordenada geográfica mediante el mecanismo de geolocalización del dispositivo y procesará la evidencia visual mediante el modelo de inteligencia artificial para generar una clasificación de severidad en las categorías leve, moderado o severo. Los registros temporales, coordenadas y resultados de clasificación serán almacenados para su posterior comparación con O1 y con los respectivos valores Ground Truth
+Sexta etapa: consolidación y control de calidad. Los datos de O1 y O2 serán integrados en una matriz única. Se comprobará que cada segmento posea sus observaciones pareadas y se identificarán registros incompletos o afectados por fallas técnicas. 
+Séptima etapa: análisis estadístico. La matriz depurada será procesada mediante estadística descriptiva e inferencial para contrastar las hipótesis específicas planteadas.
+Control de aprendizaje:
+Con la finalidad de reducir variaciones ajenas a la intervención, las mediciones de O1 y O2 se realizarán bajo un protocolo estandarizado, utilizando el mismo dispositivo y un operador previamente familiarizado con ambos procedimientos mediante la prueba piloto. Se mantendrán los mismos criterios de inicio y finalización para la medición temporal y los resultados obtenidos en O1 no serán consultados durante la ejecución de O2.
+
+Consideraciones éticas 
+La investigación se realizará respetando los principios de integridad académica, objetividad y trazabilidad de los datos. Las mediciones obtenidas no serán modificadas para favorecer las hipótesis y se conservará correspondencia entre los registros originales y la matriz utilizada para el análisis.
+Debido a que las pruebas se desarrollarán sobre infraestructura vial pública, se evitará recolectar información personal que no resulte necesaria para los objetivos de la investigación. En las evidencias fotográficas se procurará evitar la identificación de personas, matrículas vehiculares u otros datos personales incidentales. En caso de que estos aparezcan, se adoptarán medidas para impedir su utilización como información del estudio.
+Los datos generados serán empleados exclusivamente con fines académicos y de investigación. Asimismo, se respetará la autoría intelectual de las fuentes empleadas mediante citación y referencias conforme a las normas establecidas por la universidad.
+Análisis estadístico 
+	Los datos obtenidos durante la preprueba (O1) y la posprueba (O2) serán organizados y analizados mediante el software IBM SPSS Statistics. Para el análisis se empleará un nivel de significancia de 0.05 (5 %)
+ α=0.05
+En primer lugar, se realizará un análisis descriptivo de los resultados obtenidos en cada dimensión. Para el tiempo de procesamiento y el error de geolocalización se calcularán principalmente el promedio y la desviación estándar de las mediciones obtenidas antes y después de la implementación del sistema web
+Para determinar si existen diferencias significativas entre O1 y O2 en el tiempo de procesamiento y el error de geolocalización, se verificará previamente la distribución de las diferencias mediante la prueba de Shapiro-Wilk. Si los datos presentan una distribución aproximadamente normal, se utilizará la prueba t de Student para muestras relacionadas; en caso contrario, se empleará la prueba de Wilcoxon. 
+Para evaluar la exactitud de clasificación de la severidad, las clasificaciones realizadas durante O1 y O2 serán comparadas con la clasificación técnica de referencia o Ground Truth, que a su vez, será establecida independientemente mediante criterios técnicos previamente definidos y validada por un especialista con conocimiento en infraestructura vial. El responsable de efectuar la clasificación O1 no tendrá acceso a dicha clasificación de referencia durante la prueba. Cada resultado será registrado como correcto o incorrecto. Posteriormente, se utilizará la prueba de McNemar para determinar si la proporción de clasificaciones correctas mejora significativamente después de la implementación del sistema web. De manera complementaria, se calculará la exactitud global (accuracy) y se elaborará una matriz de confusión para observar los aciertos y errores en las categorías leve, moderado y severo.
+Se considerará que existe una diferencia estadísticamente significativa cuando el valor obtenido sea p < 0.05. 
+Lo que queremos saber
+Qué comparamos
+Prueba
+¿Geovial tarda menos?
+Tiempo O1 vs. tiempo O2
+t relacionada o Wilcoxon
+¿Geovial ubica mejor?
+Error en metros O1 vs. error O2
+t relacionada o Wilcoxon
+¿Geovial clasifica mejor la severidad?
+Aciertos O1 vs. aciertos O2
+McNemar
+
+
+La hipótesis general será interpretada a partir de los resultados obtenidos en las tres hipótesis específicas, considerando conjuntamente el comportamiento de las dimensiones de eficiencia temporal, exactitud de geolocalización y exactitud de clasificación, sin construir un índice único debido a que los indicadores presentan diferentes unidades de medida.
+
+
+
+CAPÍTULO III: RESULTADOS
+Presentar los resultados del análisis de datos en forma concreta, clara, precisa y ordenada según los objetivos de la investigación. Se puede hacer uso de tablas y figuras (en algunos casos ecuaciones), comentar cada tabla y figura utilizada, y haga referencia de ella en el texto. 
+
+Usar el formato de tabla según estilo APA 7. 
+Ejemplo: 
+
+
+
+
+
+
+
+Usar el formato de figura según estilo APA 7. 
+Ejemplo: 
+
+
+
+Nota: para esta sección se recomienda considerar un máximo de 5 páginas.
+
+
+CAPÍTULO IV: DISCUSIÓN Y CONCLUSIONES
+
+En esta sección se interpreta comparativamente los resultados con estudios previos citados (antecedentes o estado del arte) con los resultados de la presente investigación. Además, debe comunicarse las limitaciones de la investigación y exponer las implicancias prácticas, teóricas y/o metodológicas de los hallazgos.
+ Finalmente, se debe redactar una conclusión por cada objetivo propuesto. 
+
+Nota: para esta sección se recomienda considerar un máximo de 2 páginas, sin embargo, de acuerdo con la naturaleza y profundidad de la investigación, la discusión en particular podría requerir un poco más de dos páginas.
+
+
+
+REFERENCIAS
+Al Shafian, S., He, C., & Hu, D. (2025). DamageScope: An integrated pipeline for building damage segmentation, geospatial mapping, and interactive web-based visualization. Remote Sensing, 17(13), 2267. https://doi.org/10.3390/rs17132267
+Amo-Boateng, M., & Adu-Gyamfi, Y. (2025). Generative adversarial network for real-time identification and pixel-level annotation of highway pavement distresses. Automation in Construction, 174, 106122. https://doi.org/10.1016/j.autcon.2025.106122
+Cano-Ortiz, S., Lloret Iglesias, L., Martinez Ruiz del Árbol, P., Lastra-González, P., & Castro-Fresno, D. (2024). An end-to-end computer vision system based on deep learning for pavement distress detection and quantification. Construction and Building Materials, 416, 135036. https://doi.org/10.1016/j.conbuildmat.2024.135036
+Cruz Flores, N. E. (2023). Evaluación a nivel de inversión de la carpeta asfáltica de la Av. Cahuide de la Urbanización San Pedro-La Esperanza-Trujillo 2022 [Tesis de pregrado, Universidad Privada del Norte]. Repositorio Institucional UPN. https://hdl.handle.net/11537/36271
+de Souza, Á. M., Cestari, V. F., & Fontenele, H. B. (2025). Classification of pothole distress severity in asphalt pavements using YOLOv8. DYNA, 92(238), 47–56. https://doi.org/10.15446/dyna.v92n238.120252
+El Hakea, A. H., & Fakhr, M. W. (2023). Recent computer vision applications for pavement distress and condition assessment. Automation in Construction, 146, 104664. https://doi.org/10.1016/j.autcon.2022.104664
+Farahzadi, L., Odeh, I., Kioumarsi, M., & Shafei, B. (2025). Automated image-based condition assessment of the built environment: A state-of-the-art investigation of damage characteristics and detection requirements. Results in Engineering, 25, 104978. https://doi.org/10.1016/j.rineng.2025.104978
+Gu, Y., Liu, Y., Liu, D., Han, L. D., & Jia, X. (2024). Spatiotemporal kernel density clustering for wide area near real-time pothole detection. Advanced Engineering Informatics, 60, 102351. https://doi.org/10.1016/j.aei.2023.102351
+Hernández-Sampieri, R., & Mendoza Torres, C. P. (2023). Metodología de la investigación: Las rutas cuantitativa, cualitativa y mixta (2.ª ed.). McGraw-Hill Interamericana.
+
+Kong, S., Meng, Q., Li, X., Wang, Z., Liu, X., & Li, B. (2025). Road perception for autonomous driving: Pothole detection in complex environments based on improved YOLOv8. IEEE Access, 13, 80914–80929. https://doi.org/10.1109/ACCESS.2025.3566944
+Kothai, R., & Prabakaran, N. (2025). Self-attention GAN and SWIN transformer-based pothole detection with trust region-based LSM and Hough line transform for 2D to 3D conversion. IEEE Access, 13, 137695–137708. https://doi.org/10.1109/ACCESS.2025.3595190
+Kothai, R., Prabakaran, N., Srinivasa Murthy, Y. V., Cenkeramaddi, L. R., & Kakani, V. (2024). Pavement distress detection, classification, and analysis using machine learning algorithms: A survey. IEEE Access, 12, 126943–126960. https://doi.org/10.1109/ACCESS.2024.3455093
+Krupa, P., & Pántya, P. (2026). Bridging the information gap in emergency response: A hybrid model for digital fire safety instructions. Applied Sciences, 16(6), 2733. https://doi.org/10.3390/app16062733
+Landecho-Muzuzu, G. A., Pérez-Quintero, J. S., Valero-Fandino, J. A., & Fernández-Gómez, W. D. (2025). Automatic classification of failures of rigid pavements using artificial intelligence techniques. Revista Ingeniería de Construcción, 40(3), 0104. https://doi.org/10.7764/RIC.00157.21
+Li, D., Duan, Z., Hu, X., Zhang, D., & Zhang, Y. (2023). Automated classification and detection of multiple pavement distress images based on deep learning. Journal of Traffic and Transportation Engineering (English Edition), 10(2), 276–290. https://doi.org/10.1016/j.jtte.2021.04.008
+Li, L.-C., Liu, J., Xing, J., Liu, Z., Lin, K., & Du, B. (2024). Road pothole detection based on crowdsourced data and extended Mask R-CNN. IEEE Transactions on Intelligent Transportation Systems, 25(9), 12504–12516. https://doi.org/10.1109/TITS.2024.3360725
+Li, M., Huang, T., Li, W., Zhao, Q., & Jiang, K. (2024). Precise point positioning with mixed single- and dual-frequency GNSS observations from Android smartphones considering code-carrier inconsistency. Advances in Space Research, 74(6), 2664–2679. https://doi.org/10.1016/j.asr.2023.07.042
+Li, P., Zhou, B., Wang, C., Hu, G., Yan, Y., Guo, R., & Xia, H. (2024). CNN-based pavement defects detection using grey and depth images. Automation in Construction, 158, 105192. https://doi.org/10.1016/j.autcon.2023.105192
+Lieth, J., Abel, D., & Jünger, S. (2024). GRETA analytics: Communicating the spatial dimension of energy citizenship using a collaborative Shiny app. SoftwareX, 27, 101800. https://doi.org/10.1016/j.softx.2024.101800
+Lin, W., Li, X., Han, H., Yu, Q., & Cho, Y.-H. (2023). A novel approach for pavement distress detection and quantification using RGB-D camera and deep learning algorithm. Construction and Building Materials, 407, 133593. https://doi.org/10.1016/j.conbuildmat.2023.133593
+Liu, F., Liu, J., Wang, L., & Al-Qadi, I. L. (2024). Multiple-type distress detection in asphalt concrete pavement using infrared thermography and deep learning. Automation in Construction, 161, 105355. https://doi.org/10.1016/j.autcon.2024.105355
+Mahmoudi, H., Camboim, S., & Brovelli, M. A. (2023). Development of a voice virtual assistant for the geospatial data visualization application on the web. ISPRS International Journal of Geo-Information, 12(11), 441. https://doi.org/10.3390/ijgi12110441
+Martínez-Vargas, M. de los Á., Aguilar-Molina, Y., Ulloa-Mora, L. U., & Carlos-Mancilla, M. A. (2022). Design of a progressive web application: Virtual tourist guide assisted by geolocation in Guadalajara on Paseo Fray Antonio Alcalde. In 2022 11th International Conference on Software Process Improvement (CIMPS) (pp. 1–6). IEEE. https://doi.org/10.1109/CIMPS57786.2022.10035675
+Municipalidad Distrital de La Esperanza. (s. f.). Contacto y números de emergencia. Plataforma Digital Única del Estado Peruano. Recuperado el 6 de septiembre de 2026, de https://www.gob.pe/institucion/munilaesperanza/contacto-y-numeros-de-emergencias 
+Municipalidad Provincial de Trujillo. (2024, 8 de julio). Brecha de infraestructura vial es de por lo menos S/ 1,000 millones. Plataforma Digital Única del Estado Peruano. https://www.gob.pe/institucion/munitrujillo/noticias/986496-brecha-de-infraestructura-vial-es-de-por-lo-menos-s-1-000-millones
+Municipalidad Provincial de Trujillo. (2026, 8 de abril). S/ 2 mil millones se necesitan para renovar el asfaltado de Trujillo. Plataforma Digital Única del Estado Peruano. https://www.gob.pe/institucion/munitrujillo/noticias/1376702-s-2-mil-millones-se-necesitan-para-renovar-el-asfaltado-de-trujillo
+Palwe, S., Gunjal, A., Jindal, S., Shrivastava, A., Deshmukh, A., & Navalakha, M. (2024). An intelligent and deep learning approach for pothole surveillance smart application. Procedia Computer Science, 235, 3271–3282. https://doi.org/10.1016/j.procs.2024.04.309
+Pan, C., Li, Z., Zhang, Q., Soja, B., & Gao, J. (2024). Smartphone-based vision/MEMS-IMU/GNSS tightly coupled seamless positioning using factor graph optimization. Measurement, 229, 114420. https://doi.org/10.1016/j.measurement.2024.114420
+ Mallqui Durand, J. T & Quinto Prado, C. A. (2023). Evaluación superficial del pavimento asfáltico apoyada por el método PCI en pistas de aterrizaje de aeropuertos. Universidad, Ciencia y Tecnología, 27(118), 87–98. https://doi.org/10.47460/uct.v27i118.690
+Rahmat, M. A. P., Nofiyati, N., & Permadi, I. (2023). Progressive web app-based online repair shop application using Mapbox and Geolocation API. Jurnal Teknik Informatika (JUTIF), 4(4), 883–892. https://doi.org/10.52436/1.jutif.2023.4.4.1243
+Rezaeimanesh, M., Golroo, A., Fahmani, M. S., Amani, M. J., Hasanitabaar, F., Entezari, M. S., & Karimi, S. (2025). Attain: Inclusive annotated pavement distress types and severity dataset. Data in Brief, 61, 111715. https://doi.org/10.1016/j.dib.2025.111715
+Rique-Sabogal, A.-P., Guatame-Medina, M.-A., Moreno-Manrique, C.-F., Jiménez-López, F.-R., & Jiménez-López, A.-F. (2025). Análisis estructural de baches viales mediante redes neuronales profundas. TecnoLógicas, 28(63), e3266. https://doi.org/10.22430/22565337.3266
+Roman-Garay, M., Rodriguez-Rangel, H., Hernandez-Beltran, C. B., Lepej, P., Arreygue-Rocha, J. E., & Morales-Rosales, L. A. (2025). Architecture for pavement pothole evaluation using deep learning, machine vision, and fuzzy logic. Case Studies in Construction Materials, 22, e04440. https://doi.org/10.1016/j.cscm.2025.e04440
+Rosli, A. S., Roslan, M., & Nordin, A. (2022). Design and development of a pothole tracking system (PotAlert) using Web Progressive Application (WPA). International Journal on Perceptive and Cognitive Computing, 8(1), 1–10. https://journals.iium.edu.my/kict/index.php/IJPCC/article/view/264
+Salcedo-Navarro, A., Montalban-Faet, G., Segura-Garcia, J., & Garcia-Pineda, M. (2025). A scalable web system for multi-index 3D point cloud visualization and real-time sensor monitoring in precision agriculture. SoftwareX, 32, 102443. https://doi.org/10.1016/j.softx.2025.102443
+Shang, J., Zhang, A. A., Dong, Z., Zhang, H., & He, A. (2024). Automated pavement detection and artificial intelligence pavement image data processing technology. Automation in Construction, 168, 105797. https://doi.org/10.1016/j.autcon.2024.105797
+Sholevar, N., Golroo, A., & Roghani Esfahani, S. (2022). Machine learning techniques for pavement condition evaluation. Automation in Construction, 136, 104190. https://doi.org/10.1016/j.autcon.2022.104190
+Urbiztondo, M., Wu, M., & Kwon, T. J. (2025). Advancing winter road maintenance: An AI-driven web platform for real-time road condition monitoring and spatial analysis. Transportation Research Interdisciplinary Perspectives, 33, 101575. https://doi.org/10.1016/j.trip.2025.101575
+Veas-Castillo, L., Andrade, G., Lazo, C., Letelier, T., Díaz, I., Alacid, M., & Hermosilla, M. (2026). Participatory digital traceability systems for information governance: Design and real-world deployment in urban afforestation programs. Information, 17(4), 348. https://doi.org/10.3390/info17040348
+Weng, D., Hou, Z., Meng, Y., Cai, M., & Chan, Y. (2023). Characterization and mitigation of urban GNSS multipath effects on smartphones. Measurement, 223, 113766. https://doi.org/10.1016/j.measurement.2023.113766
+Xu, P., Zhang, G., Yang, B., & Hsu, L.-T. (2023). PositionNet: CNN-based GNSS positioning in urban areas with residual maps. Applied Soft Computing, 148, 110882. https://doi.org/10.1016/j.asoc.2023.110882
+Yilmaz, M., Yalcin, E., Demir, F., Özdemir, A. M., Atar, M., Gunes, A., Furtana Yalcin, B., & Cambay, E. (2025). Automatic segmentation of asphalt cracks on highways after large-scale and severe earthquakes using deep learning-based approaches. IEEE Access, 13, 22820–22830. https://doi.org/10.1109/ACCESS.2025.3536554
+Zhang, T., Wang, D., & Lu, Y. (2024). A data-centric strategy to improve performance of automatic pavement defects detection. Automation in Construction, 160, 105334. https://doi.org/10.1016/j.autcon.2024.105334
+Zhao, K., Xu, S., Loney, J., Visentin, A., & Li, Z. (2024). Road pavement health monitoring system using smartphone sensing with a two-stage machine learning model. Automation in Construction, 167, 105664. https://doi.org/10.1016/j.autcon.2024.105664
+Zheng, L., Xiao, J., Wang, Y., Wu, W., Chen, Z., Yuan, D., & Jiang, W. (2024). Deep learning-based intelligent detection of pavement distress. Automation in Construction, 168, 105772. https://doi.org/10.1016/j.autcon.2024.105772
+Zhou, J., Wang, Y., & Zhou, W. (2025). Efficient instance segmentation framework for UAV-based pavement distress detection. Automation in Construction, 175, 106195. https://doi.org/10.1016/j.autcon.2025.106195
+
+
+
+
+
+Tener en cuenta que todo lo citado en el texto debe incluirse en las referencias, así como todas las referencias deben corresponder a una cita en el texto. 
+
+
+
+ANEXOS
+
+En los anexos colocar sólo aquellos complementos que signifique evidencias o procedimientos realizados en la investigación de manera pertinente y suficiente. (Evitar excesos innecesarios)
+Cada evidencia en los anexos va en hoja independiente. Cada hoja que contenga un anexo debe ser numerada: ANEXO N° 1. Título del anexo.
+
+
+
+
+

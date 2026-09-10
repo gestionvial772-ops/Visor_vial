@@ -20,7 +20,7 @@ function contrasenasIgualesValidator(grupo: AbstractControl): ValidationErrors |
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
   ],
   selector: 'app-register',
   styleUrl: './register.scss',
