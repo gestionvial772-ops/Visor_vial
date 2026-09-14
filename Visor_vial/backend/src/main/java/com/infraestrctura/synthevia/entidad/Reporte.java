@@ -25,10 +25,7 @@ public class Reporte {
     private String descripcion;
 
     @Column(name = "estado", nullable = false)
-    private String estado; // PENDIENTE | EN_PROCESO | RESUELTO | DUPLICADO
-
-    @Column(name = "es_preprueba", nullable = false)
-    private Boolean esPreprueba = false;
+    private String estado; 
 
     @Column(name = "reporte_original_id")
     private Integer reporteOriginalId;
@@ -36,7 +33,16 @@ public class Reporte {
     @Column(name = "fecha_creacion", nullable = false)
     private OffsetDateTime fechaCreacion;
 
-    // ── Getters y Setters ──────────────────────────────────────────────────
+    @PrePersist 
+    protected void prePersist(){
+        if(fechaCreacion == null){
+            fechaCreacion = OffsetDateTime.now();
+        }
+        if(estado == null){
+            estado = "PENDIENTE";
+        }
+    }
+
     public Integer getIdReporte()                     { return idReporte; }
     public void    setIdReporte(Integer v)             { this.idReporte = v; }
 
@@ -54,9 +60,6 @@ public class Reporte {
 
     public String  getEstado()                        { return estado; }
     public void    setEstado(String v)                 { this.estado = v; }
-
-    public Boolean getEsPreprueba()                   { return esPreprueba; }
-    public void    setEsPreprueba(Boolean v)           { this.esPreprueba = v; }
 
     public Integer getReporteOriginalId()             { return reporteOriginalId; }
     public void    setReporteOriginalId(Integer v)     { this.reporteOriginalId = v; }
