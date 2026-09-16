@@ -5,8 +5,10 @@ import com.infraestrctura.synthevia.dto.EstadisticasDto;
 import com.infraestrctura.synthevia.dto.PaginaDto;
 import com.infraestrctura.synthevia.dto.ReporteResumenDto;
 import com.infraestrctura.synthevia.entidad.Reporte;
-import com.infraestrctura.synthevia.repositorio.ReporteRepository;
+import com.infraestrctura.synthevia.servicio.ReporteService;
 import jakarta.validation.Valid;
+
+import org.apache.commons.logging.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -22,10 +24,10 @@ import java.util.Optional;
 public class ReporteController {
 
     private static final Logger log = LoggerFactory.getLogger(ReporteController.class);
-    private final ReporteRepository reporteRepository;
+    private final ReporteService reporteService;
 
-    public ReporteController(ReporteRepository reporteRepository) {
-        this.reporteRepository = reporteRepository;
+    public ReporteController(ReporteService reporteService) {
+        this.reporteService = reporteService;
     }
 
     @GetMapping
@@ -35,8 +37,11 @@ public class ReporteController {
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) String busqueda) {
 
-        Pageable pageable = PageRequest.of(pagina, tamanio);
-        Page<Reporte> page = reporteRepository.buscar(estado, busqueda, pageable);
+        Page<Reporte> page = reporteService.listar(
+                pagina,
+                tamanio,
+                estado,
+                busqueda);
 
         Page<ReporteResumenDto> dtoPage = page.map(this::toDto);
 
@@ -51,8 +56,8 @@ public class ReporteController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ReporteResumenDto> obtener(@PathVariable Integer id) {
-        return reporteRepository.findById(id)
-                .map(r -> ResponseEntity.ok(toDto(r)))
+        return reporteService.obtener(id)
+                .map(reporte -> ResponseEntity.ok(toDto(reporte)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -61,52 +66,51 @@ public class ReporteController {
             @PathVariable Integer id,
             @Valid @RequestBody ActualizarEstadoDto dto) {
 
-        Optional<Reporte> opt = reporteRepository.findById(id);
-        if (opt.isEmpty())
+        Optional<Reporte> actualizado = reporteService.actualizarEstado(id, dto.estado());
+        if (actualizado.isEmpty())
             return ResponseEntity.notFound().build();
 
-        Reporte r = opt.get();
-        String anterior = r.getEstado();
-        r.setEstado(dto.estado());
-        reporteRepository.save(r);
-
-        log.info("Reporte #{}: {} → {}", id, anterior, dto.estado());
-        return ResponseEntity.ok(toDto(r));
+        log.info("Reporte #{}: actualizado a {}", id, dto.estado());
+        return ResponseEntity.ok(toDto(actualizado.get()));
     }
 
     @GetMapping("/estadisticas")
     public ResponseEntity<EstadisticasDto> estadisticas() {
-        long total = reporteRepository.contarTotal();
-        long pendientes = reporteRepository.countByEstado("PENDIENTE");
-        long enProceso = reporteRepository.countByEstado("EN_PROCESO");
-        long resueltos = reporteRepository.countByEstado("RESUELTO");
-        long duplicados = reporteRepository.countByEstado("DUPLICADO");
 
-        log.info("Estadísticas: total={}, pendientes={}, enProceso={}, resueltos={}", total, pendientes, enProceso,
-                resueltos);
-        return ResponseEntity.ok(new EstadisticasDto(total, pendientes, enProceso, resueltos, duplicados));
+        return ResponseEntity.ok(reporteService.obtenerEstadisticas());
     }
 
     @PostMapping
     public ResponseEntity<ReporteResumenDto> crear(@RequestBody Reporte body) {
-        Reporte r = new Reporte();
-        r.setIdUsuario(body.getIdUsuario() != null ? body.getIdUsuario() : 1);
-        r.setIdVia(body.getIdVia());
-        r.setImagenUrl(body.getImagenUrl() != null ? body.getImagenUrl() : "");
-        r.setDescripcion(body.getDescripcion());
-        r.setEstado("PENDIENTE");
-        Reporte saved = reporteRepository.save(r);
-        log.info("Reporte creado: #{}", saved.getIdReporte());
+
+        Reporte saved = reporteService.crear(body);
+
+        log.info(
+                "Reporte creado #{}",
+                saved.getIdReporte());
+
         return ResponseEntity.status(201).body(toDto(saved));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        if (!reporteRepository.existsById(id))
-            return ResponseEntity.notFound().build();
-        reporteRepository.deleteById(id);
-        log.info("Reporte #{} eliminado", id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Integer id) {
+
+        boolean eliminado = reporteService.eliminar(id);
+
+        if (!eliminado) {
+            return ResponseEntity
+                    .notFound()
+                    .build();
+        }
+
+        log.info(
+                "Reporte #{} eliminado",
+                id);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     private ReporteResumenDto toDto(Reporte r) {
