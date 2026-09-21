@@ -5,7 +5,7 @@ export interface Reporte{
     idReporte: number,
     idUsuario: number,
     idVia: number | null,
-    reporteOriginalId: string | null,
+    reporteOriginalId: number | null,
     imagenUrl: string,
     descripcion: string | null,
     estado: Estado;
@@ -31,7 +31,7 @@ export interface Clasificacion {
   idReporte: number;
   severidad: 1 | 2 | 3;
   etiquetaDetectada: string | null;
-  nivelConfianza: number; // 0 a 100
+  nivelConfianza: number; 
   modeloIaUtilizado: string;
 }
 
@@ -40,10 +40,11 @@ export interface ReporteDetalle extends Reporte {
   clasificacion?: Clasificacion;
 }
 
-
-export interface NuevoReporte {
-  idVia?: number;
-  imagenUrl: string;
-  descripcion?: string;
-  puntoCapturado: PuntoGeografico;
+export interface CrearReporteRequest {
+  idVia: number | null;
+  descripcion: string;
+  latitud: number;
+  longitud: number;
+  precisionReportadaMetros: number | null;
+  instanteInicioCaptura: string;
 }

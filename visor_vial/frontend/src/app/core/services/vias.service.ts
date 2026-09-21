@@ -1,4 +1,8 @@
-import { Service } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-@Service()
-export class ViasService {}
+@Injectable({
+  providedIn: 'root'
+})
+export class ViasService {
+
+}

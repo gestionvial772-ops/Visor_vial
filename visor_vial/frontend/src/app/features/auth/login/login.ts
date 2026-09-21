@@ -11,27 +11,34 @@ import { ToastService } from '../../../core/services/toast.service';
 import { SessionService } from '../../../core/services/session.service';
 
 @Component({
-  imports: [CommonModule, ReactiveFormsModule, RouterLink,
-            RecaptchaFormsModule, RecaptchaModule,
-            CampoPassword, CampoTexto, ImagenConReloj],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    RecaptchaFormsModule,
+    RecaptchaModule,
+    CampoPassword,
+    CampoTexto,
+    ImagenConReloj,
+  ],
   selector: 'app-login',
   styleUrl: './login.scss',
   templateUrl: './login.html',
 })
 export class Login {
   formulario: FormGroup;
-  private fb       = inject(FormBuilder);
-  private auth     = inject(AuthService);
-  private toast    = inject(ToastService);
-  private session  = inject(SessionService);
-  private router   = inject(Router);
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private toast = inject(ToastService);
+  private session = inject(SessionService);
+  private router = inject(Router);
 
   constructor() {
     this.formulario = this.fb.group({
-      dni:        ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
+      dni: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
       contrasena: ['', Validators.required],
       recordarme: [false],
-      captcha:    ['', Validators.required],
+      captcha: ['', Validators.required],
     });
   }
 
@@ -40,23 +47,24 @@ export class Login {
       this.formulario.markAllAsTouched();
       return;
     }
-    const { dni, contrasena } = this.formulario.value;
-    this.auth.iniciarSesion({ dni, contrasena }).subscribe({
-      next: (res) => {
-        if (res.exito && res.nombre && res.rol) {
-          this.session.iniciar({ nombre: res.nombre, rol: res.rol });
-          this.toast.mostrar(res.mensaje, true);
-          // Redirigir según rol
-          if (res.rol === 'ADMIN') {
-            this.router.navigate(['/admin/dashboard']);
+    const { dni, contrasena, captcha, recordarme } = this.formulario.value;
+    this.auth
+      .iniciarSesion({ dni, contrasena, captchaToken: captcha, recordarme: recordarme ?? false })
+      .subscribe({
+        next: (res) => {
+          if (res.exito && res.nombre && res.rol) {
+            this.session.iniciar({ nombre: res.nombre, rol: res.rol });
+            this.toast.mostrar(res.mensaje, true);
+            if (res.rol === 'ADMIN') {
+              this.router.navigate(['/admin/dashboard']);
+            } else {
+              this.router.navigate(['/ciudadano/nuevo-reporte']);
+            }
           } else {
-            this.router.navigate(['/ciudadano/dashboard']);
+            this.toast.mostrar(res.mensaje, false);
           }
-        } else {
-          this.toast.mostrar(res.mensaje, false);
-        }
-      },
-      error: () => this.toast.mostrar('Error de conexión con el servidor', false),
-    });
+        },
+        error: () => this.toast.mostrar('Error de conexión con el servidor', false),
+      });
   }
 }

@@ -3,27 +3,27 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface ReporteResumen {
-  idReporte:       number;
-  idUsuario:       number;
-  idVia:           number | null;
-  imagenUrl:       string;
-  descripcion:     string | null;
-  estado:          'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO' | 'DUPLICADO';
-  fechaCreacion:   string;
+  idReporte: number;
+  idUsuario: number;
+  idVia: number | null;
+  imagenUrl: string;
+  descripcion: string | null;
+  estado: 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO' | 'DUPLICADO';
+  fechaCreacion: string;
 }
 
 export interface PaginaDto<T> {
-  contenido:       T[];
-  paginaActual:    number;
-  totalPaginas:    number;
-  totalElementos:  number;
+  contenido: T[];
+  paginaActual: number;
+  totalPaginas: number;
+  totalElementos: number;
 }
 
 export interface Estadisticas {
-  total:      number;
+  total: number;
   pendientes: number;
-  enProceso:  number;
-  resueltos:  number;
+  enProceso: number;
+  resueltos: number;
   duplicados: number;
 }
 
@@ -35,10 +35,10 @@ export interface NuevoReporteDto {
 }
 
 export interface ViaSegmento {
-  idVia:            number;
-  codigoSegmento:   string;
-  nombreVia:        string;
-  fechaRegistro:    string;
+  idVia: number;
+  codigoSegmento: string;
+  nombreVia: string;
+  fechaRegistro: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -46,7 +46,12 @@ export class ReportesService {
   private http = inject(HttpClient);
   private readonly BASE = 'http://localhost:8080/admin/reportes';
 
-  listar(pagina = 0, tamanio = 10, estado?: string, busqueda?: string): Observable<PaginaDto<ReporteResumen>> {
+  listar(
+    pagina = 0,
+    tamanio = 10,
+    estado?: string,
+    busqueda?: string,
+  ): Observable<PaginaDto<ReporteResumen>> {
     let params = new HttpParams().set('pagina', pagina).set('tamanio', tamanio);
     if (estado) params = params.set('estado', estado);
     if (busqueda && busqueda.trim()) params = params.set('busqueda', busqueda.trim());

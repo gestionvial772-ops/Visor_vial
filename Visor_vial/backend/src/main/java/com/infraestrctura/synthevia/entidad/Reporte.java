@@ -25,7 +25,7 @@ public class Reporte {
     private String descripcion;
 
     @Column(name = "estado", nullable = false)
-    private String estado; 
+    private String estado;
 
     @Column(name = "reporte_original_id")
     private Integer reporteOriginalId;
@@ -33,37 +33,77 @@ public class Reporte {
     @Column(name = "fecha_creacion", nullable = false)
     private OffsetDateTime fechaCreacion;
 
-    @PrePersist 
-    protected void prePersist(){
-        if(fechaCreacion == null){
+    @PrePersist
+    protected void prePersist() {
+        if (fechaCreacion == null) {
             fechaCreacion = OffsetDateTime.now();
         }
-        if(estado == null){
+        if (estado == null) {
             estado = "PENDIENTE";
         }
     }
 
-    public Integer getIdReporte()                     { return idReporte; }
-    public void    setIdReporte(Integer v)             { this.idReporte = v; }
+    public Integer getIdReporte() {
+        return idReporte;
+    }
 
-    public Integer getIdUsuario()                     { return idUsuario; }
-    public void    setIdUsuario(Integer v)             { this.idUsuario = v; }
+    public void setIdReporte(Integer v) {
+        this.idReporte = v;
+    }
 
-    public Integer getIdVia()                         { return idVia; }
-    public void    setIdVia(Integer v)                 { this.idVia = v; }
+    public Integer getIdUsuario() {
+        return idUsuario;
+    }
 
-    public String  getImagenUrl()                     { return imagenUrl; }
-    public void    setImagenUrl(String v)              { this.imagenUrl = v; }
+    public void setIdUsuario(Integer v) {
+        this.idUsuario = v;
+    }
 
-    public String  getDescripcion()                   { return descripcion; }
-    public void    setDescripcion(String v)            { this.descripcion = v; }
+    public Integer getIdVia() {
+        return idVia;
+    }
 
-    public String  getEstado()                        { return estado; }
-    public void    setEstado(String v)                 { this.estado = v; }
+    public void setIdVia(Integer v) {
+        this.idVia = v;
+    }
 
-    public Integer getReporteOriginalId()             { return reporteOriginalId; }
-    public void    setReporteOriginalId(Integer v)     { this.reporteOriginalId = v; }
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
 
-    public OffsetDateTime getFechaCreacion()           { return fechaCreacion; }
-    public void           setFechaCreacion(OffsetDateTime v) { this.fechaCreacion = v; }
+    public void setImagenUrl(String v) {
+        this.imagenUrl = v;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String v) {
+        this.descripcion = v;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String v) {
+        this.estado = v;
+    }
+
+    public Integer getReporteOriginalId() {
+        return reporteOriginalId;
+    }
+
+    public void setReporteOriginalId(Integer v) {
+        this.reporteOriginalId = v;
+    }
+
+    public OffsetDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(OffsetDateTime v) {
+        this.fechaCreacion = v;
+    }
 }

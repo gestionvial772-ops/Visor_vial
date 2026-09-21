@@ -1,0 +1,234 @@
+<div class="min-vh-100 py-5 px-3" style="background-color: #e2efea">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="fw-bold mb-2" style="color: #1a3e38">
+        <i class="fa-solid fa-road me-2"></i>
+        Nuevo reporte vial
+      </h2>
+      <p class="text-muted mb-0">
+        Registra un deterioro vial adjuntando una fotografía y permitiendo el acceso a tu ubicación.
+      </p>
+    </div>
+    @if (mensajeExito) {
+      <div class="alert alert-success d-flex align-items-center shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check fs-5 me-3"></i>
+
+        <div>
+          {{ mensajeExito }}
+        </div>
+      </div>
+    }
+    @if (mensajeError) {
+      <div class="alert alert-danger d-flex align-items-center shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-exclamation fs-5 me-3"></i>
+
+        <div>
+          {{ mensajeError }}
+        </div>
+      </div>
+    }
+    <div
+      class="card border-0 shadow-lg rounded-4 overflow-hidden mx-auto"
+      style="max-width: 1100px"
+    >
+      <div class="row g-0">
+        <div class="col-lg-5 p-4 d-flex flex-column" style="background-color: #f5faf8">
+          <div class="mb-3">
+            <h5 class="fw-bold mb-1" style="color: #1a3e38">
+              <i class="fa-solid fa-camera me-2"></i>
+              Fotografía del deterioro
+            </h5>
+
+            <p class="text-muted small mb-0">Selecciona una imagen clara del daño encontrado.</p>
+          </div>
+          <div
+            class="border rounded-4 bg-white d-flex justify-content-center align-items-center overflow-hidden mb-3 flex-grow-1"
+            style="min-height: 320px"
+          >
+            @if (imagenPrevisualizacion) {
+              <img
+                [src]="imagenPrevisualizacion"
+                alt="Vista previa del deterioro vial"
+                class="img-fluid w-100 h-100 object-fit-cover"
+                style="max-height: 420px"
+              />
+            } @else {
+              <div class="text-center text-muted px-4 py-5">
+                <i class="fa-regular fa-image mb-3" style="font-size: 4rem; color: #43887b"></i>
+                <p class="fw-semibold mb-1">Ninguna fotografía seleccionada</p>
+                <p class="small mb-0">La imagen aparecerá aquí antes de enviar el reporte.</p>
+              </div>
+            }
+          </div>
+          <input
+            #inputImagen
+            type="file"
+            class="d-none"
+            accept="image/*"
+            capture="environment"
+            (change)="seleccionarImagen($event)"
+          />
+          <button
+            type="button"
+            class="btn text-white rounded-pill py-2"
+            style="background-color: #43887b"
+            (click)="inputImagen.click()"
+          >
+            <i class="fa-solid fa-camera-retro me-2"></i>
+
+            @if (archivoSeleccionado) {
+              Cambiar fotografía
+            } @else {
+              Seleccionar fotografía
+            }
+          </button>
+          @if (archivoSeleccionado) {
+            <div class="small text-muted text-center mt-2">
+              <i class="fa-solid fa-paperclip me-1"></i>
+
+              {{ archivoSeleccionado.name }}
+            </div>
+          }
+        </div>
+        <div class="col-lg-7 bg-white p-4 p-md-5">
+          <form [formGroup]="formulario" (ngSubmit)="enviarReporte()">
+            <div class="mb-4">
+              <label for="descripcion" class="form-label fw-semibold" style="color: #1a3e38">
+                <i class="fa-solid fa-pen-to-square me-2"></i>
+                Descripción
+              </label>
+
+              <textarea
+                id="descripcion"
+                class="form-control rounded-3"
+                rows="5"
+                maxlength="1000"
+                formControlName="descripcion"
+                placeholder="Describe brevemente el deterioro observado..."
+              ></textarea>
+              <div class="d-flex justify-content-between mt-1">
+                <small class="text-muted"> Este campo es opcional. </small>
+
+                <small class="text-muted">
+                  {{ formulario.get('descripcion')?.value?.length ?? 0 }}/1000
+                </small>
+              </div>
+              @if (
+                formulario.get('descripcion')?.touched &&
+                formulario.get('descripcion')?.hasError('maxlength')
+              ) {
+                <div class="text-danger small mt-1">
+                  <i class="fa-solid fa-circle-exclamation me-1"></i>
+
+                  La descripción no puede superar los 1000 caracteres.
+                </div>
+              }
+            </div>
+            <div class="mb-4">
+              <h6 class="fw-bold mb-3" style="color: #1a3e38">
+                <i class="fa-solid fa-location-dot me-2"></i>
+                Ubicación
+              </h6>
+              @if (obteniendoUbicacion) {
+                <div class="alert alert-info d-flex align-items-center">
+                  <div class="spinner-border spinner-border-sm me-3" role="status">
+                    <span class="visually-hidden"> Cargando... </span>
+                  </div>
+                  Obteniendo tu ubicación actual...
+                </div>
+              }
+              @if (!obteniendoUbicacion && latitud !== null && longitud !== null) {
+                <div class="border rounded-3 p-3" style="background-color: #f5faf8">
+                  <div class="d-flex align-items-center mb-3">
+                    <i class="fa-solid fa-circle-check me-2" style="color: #43887b"></i>
+
+                    <span class="fw-semibold" style="color: #1a3e38">
+                      Ubicación obtenida correctamente
+                    </span>
+                  </div>
+                  <div class="row g-3 small">
+                    <div class="col-md-6">
+                      <span class="text-muted d-block"> Latitud </span>
+                      <strong>
+                        {{ latitud }}
+                      </strong>
+                    </div>
+                    <div class="col-md-6">
+                      <span class="text-muted d-block"> Longitud </span>
+                      <strong>
+                        {{ longitud }}
+                      </strong>
+                    </div>
+                    <div class="col-12">
+                      <span class="text-muted">
+                        <i class="fa-solid fa-bullseye me-1"></i>
+                        Precisión aproximada:
+                      </span>
+                      <strong class="ms-1">
+                        @if (precisionReportadaMetros !== null) {
+                          {{ precisionReportadaMetros | number: '1.0-2' }} m
+                        } @else {
+                          No disponible
+                        }
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              }
+     
+              @if (errorUbicacion) {
+                <div class="alert alert-warning mt-3">
+                  <div class="d-flex">
+                    <i class="fa-solid fa-triangle-exclamation me-3 mt-1"></i>
+                    <div>
+                      <div class="fw-semibold">No se pudo obtener la ubicación</div>
+                      <div class="small">
+                        {{ errorUbicacion }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+         
+              <button
+                type="button"
+                class="btn btn-outline-secondary rounded-pill mt-3"
+                [disabled]="obteniendoUbicacion"
+                (click)="obtenerUbicacion()"
+              >
+                <i class="fa-solid fa-location-crosshairs me-2"></i>
+
+                Actualizar ubicación
+              </button>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="small text-muted mb-4">
+              <i class="fa-solid fa-shield-halved me-2"></i>
+              La ubicación y el instante de inicio del reporte se registran automáticamente para
+              asegurar la trazabilidad de la información.
+            </div>
+
+            <div class="d-flex justify-content-end">
+              <button
+                type="submit"
+                class="btn text-white rounded-pill px-5 py-2"
+                style="background-color: #1a544a"
+                [disabled]="enviando || obteniendoUbicacion"
+              >
+                @if (enviando) {
+                  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                  Registrando...
+                } @else {
+                  <i class="fa-solid fa-paper-plane me-2"></i>
+                  Registrar reporte
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

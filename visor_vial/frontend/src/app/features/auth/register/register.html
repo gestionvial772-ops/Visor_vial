@@ -19,8 +19,16 @@
           
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="nombres" class="form-label fw-bold small"><i class="fa-solid fa-user text-muted me-2"></i>Nombres</label>
-              <input id="nombres" type="text" class="form-control rounded-pill" formControlName="nombres" placeholder="Nombres" />
+              <label for="nombre" class="form-label fw-bold small"><i class="fa-solid fa-user text-muted me-2"></i>Nombres</label>
+              <input id="nombre" type="text" class="form-control rounded-pill" formControlName="nombre" placeholder="Nombres" />
+              @if(
+                formulario.get('nombre')?.touched && formulario.get('nombre')?.invalid
+              ){
+                <div class="text-danger small mt-1">
+                  Ingresa tus nombres
+                </div>
+              }
+            
             </div>
             <div class="col-md-6 mt-3 mt-md-0">
               <label for="apellidos" class="form-label fw-bold small"><i class="fa-solid fa-user text-muted me-2"></i>Apellidos</label>
@@ -56,6 +64,12 @@
 
           <div class="mb-4 mt-4 d-flex justify-content-center justify-content-md-start">
              <re-captcha formControlName="captcha"></re-captcha>
+             @if (formulario.get('captcha')?.touched && formulario.get('captcha')?.invalid) 
+             {
+            <div class="text-danger small mt-1">
+                Confirma que no eres un robot.
+            </div>
+             }
           </div>
 
             <div class="form-check mb-4">
@@ -63,15 +77,19 @@
               <label class="form-check-label small text-muted" for="checkTerminos">
                 Crear tu cuenta y aceptar <a href="#" style="color: #43887B;">términos y condiciones</a>
               </label>
-            
           </div>
 
           <div class="text-center">
             <button type="submit" class="btn text-white mt-3 rounded-pill w-50 justify-content-between align-items-center" style="background-color: #1A544A;">
+             @if (enviando) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true">
+              </span> Creando cuenta...
+
+            } @else {
               Crear cuenta
+            }
             </button>
           </div>
-          
         </form>
       </div>
     </div>
