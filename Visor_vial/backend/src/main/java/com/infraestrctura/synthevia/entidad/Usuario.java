@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+
 
 @Entity
 @Table(name = "usuario")
@@ -16,8 +15,7 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(name = "dni", unique = true, length = 8, nullable = false, columnDefinition = "char(8)")
+    @Column(name = "dni", unique = true, length = 8, nullable = false)
     private String dni;
 
     @Column(name = "nombre", nullable = false)
