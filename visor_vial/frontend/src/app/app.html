@@ -1,0 +1,40 @@
+@if (toastService.estado().visible) {
+  <div
+    class="notificacion-toast"
+    [class.exito]="toastService.estado().exito"
+    [class.error]="!toastService.estado().exito"
+  >
+    <div class="toast-body">
+
+      <!-- Ícono SVG animado -->
+      <div class="toast-svg-wrap">
+        @if (toastService.estado().exito) {
+          <!-- Check animado -->
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <circle class="circulo" cx="20" cy="20" r="18"/>
+            <polyline class="check-trazo" points="12,21 18,27 29,14"/>
+          </svg>
+        } @else {
+          <!-- X animada -->
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <circle class="circulo" cx="20" cy="20" r="18"/>
+            <line class="x-trazo" x1="13" y1="13" x2="27" y2="27"/>
+            <line class="x-trazo" x1="27" y1="13" x2="13" y2="27"/>
+          </svg>
+        }
+      </div>
+
+      <!-- Texto -->
+      <div class="toast-texto">
+        <span class="toast-titulo">{{ toastService.estado().exito ? 'Inicio de sesión exitoso' : 'Error' }}</span>
+        <span class="toast-mensaje">{{ toastService.estado().mensaje }}</span>
+      </div>
+
+    </div>
+
+    <!-- Barra de progreso que indica cuánto tiempo queda -->
+    <div class="toast-progreso"></div>
+  </div>
+}
+
+<router-outlet></router-outlet>

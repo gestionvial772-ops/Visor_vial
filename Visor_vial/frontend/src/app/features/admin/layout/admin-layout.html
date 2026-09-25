@@ -1,0 +1,67 @@
+<div class="admin-shell" [class.sidebar-colapsado]="sidebarColapsado()">
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <aside class="sidebar">
+
+    <!-- Logo / Brand -->
+    <div class="sidebar-brand">
+      <span class="brand-icon"><i class="bi bi-sign-intersection-fill"></i></span>
+      @if (!sidebarColapsado()) {
+        <span class="brand-text">SYNTHEVIA</span>
+      }
+    </div>
+
+    <!-- Navegación -->
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.ruta) {
+        <a [routerLink]="item.ruta"
+           routerLinkActive="activo"
+           class="nav-item"
+           [title]="item.etiqueta">
+          <i class="bi {{ item.icono }} nav-icon"></i>
+          @if (!sidebarColapsado()) {
+            <span class="nav-label">{{ item.etiqueta }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <!-- Footer sidebar -->
+    <div class="sidebar-footer">
+      <button class="nav-item btn-cerrar" (click)="cerrarSesion()" title="Cerrar sesión">
+        <i class="bi bi-box-arrow-left nav-icon"></i>
+        @if (!sidebarColapsado()) {
+          <span class="nav-label">Cerrar sesión</span>
+        }
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════════ ÁREA PRINCIPAL ══════════════ -->
+  <div class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="topbar-toggle" (click)="toggleSidebar()">
+        <i class="bi" [class.bi-layout-sidebar-reverse]="sidebarColapsado()" [class.bi-layout-sidebar]="!sidebarColapsado()"></i>
+      </button>
+
+      <div class="topbar-right">
+        <div class="topbar-user">
+          <div class="avatar">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ session.usuario()?.nombre }}</span>
+            <span class="user-rol badge-rol">{{ session.usuario()?.rol }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO DE LA PÁGINA -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

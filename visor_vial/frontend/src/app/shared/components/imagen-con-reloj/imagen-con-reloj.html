@@ -1,0 +1,10 @@
+<div class="position-relative h-100 w-100">
+  <img [src]="imagenUrl" alt="Imagen capturada" class="img-fluid w-100 h-100" style="object-fit: cover; min-height: 500px;" />
+  
+  <div class="position-absolute bottom-0 end-0 me-1 mb-1">
+    <span class="badge  shadow-sm  text-dark" style="background-color: rgba(255, 255, 255, 0.85);">
+      <i class="fa-regular fa-clock me-1 text-muted"></i>
+      {{ fechaCaptura | date: "EEEE, d 'de' MMMM, hh:mm:ss a" : '' : 'es-PE' }}
+    </span>
+  </div>
+</div>

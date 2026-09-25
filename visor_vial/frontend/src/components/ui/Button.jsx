@@ -1,1 +1,0 @@
-// botón genérico reutilizable

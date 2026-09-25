@@ -1,0 +1,27 @@
+<div class="mb-3">
+  @if (label) {
+    <label class="form-label fw-bold">{{ label }}</label>
+  }
+  <div class="input-group">
+    @if(icono){
+      <span class="input-group-text bg-white border-end-0">
+        <i class="fa-solid fa-{{icono}} text-muted"></i>
+      </span>
+    }
+    
+    <input
+      [type]="tipo"
+      class="form-control"
+      [class.border-start-0]="icono"
+      [placeholder]="placeholder"
+      [value]="valor"
+      [disabled]="deshabilitado"
+      (input)="alCambiar($any($event.target).value)"
+      (blur)="alTocar()"
+    />
+  </div>
+
+  @if (mostrarError && mensajeError) {
+    <div class="text-danger mt-1 small">{{ mensajeError }}</div>
+  }
+</div>
