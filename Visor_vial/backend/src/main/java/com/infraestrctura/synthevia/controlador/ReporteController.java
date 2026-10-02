@@ -5,16 +5,18 @@ import com.infraestrctura.synthevia.dto.EstadisticasDto;
 import com.infraestrctura.synthevia.dto.PaginaDto;
 import com.infraestrctura.synthevia.dto.ReporteResumenDto;
 import com.infraestrctura.synthevia.entidad.Reporte;
-import com.infraestrctura.synthevia.repositorio.ReporteRepository;
+import com.infraestrctura.synthevia.servicio.ReporteService;
+import com.infraestrctura.synthevia.servicio.SupabaseStorageService;
 import jakarta.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -22,100 +24,129 @@ import java.util.Optional;
 public class ReporteController {
 
     private static final Logger log = LoggerFactory.getLogger(ReporteController.class);
-    private final ReporteRepository reporteRepository;
+    private final ReporteService reporteService;
+    private final SupabaseStorageService supabaseStorageService;
 
-    public ReporteController(ReporteRepository reporteRepository) {
-        this.reporteRepository = reporteRepository;
+    public ReporteController(
+            ReporteService reporteService,
+            SupabaseStorageService supabaseStorageService) {
+        this.reporteService = reporteService;
+        this.supabaseStorageService = supabaseStorageService;
     }
 
-    // ── GET /admin/reportes?pagina=0&tamanio=10&estado=PENDIENTE&busqueda=texto ──
     @GetMapping
     public ResponseEntity<PaginaDto<ReporteResumenDto>> listar(
-            @RequestParam(defaultValue = "0")  int pagina,
+            @RequestParam(defaultValue = "0") int pagina,
             @RequestParam(defaultValue = "10") int tamanio,
-            @RequestParam(required = false)    String estado,
-            @RequestParam(required = false)    String busqueda) {
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String busqueda) {
 
-        Pageable pageable = PageRequest.of(pagina, tamanio);
-        Page<Reporte> page = reporteRepository.buscar(estado, busqueda, pageable);
+        Page<Reporte> page = reporteService.listar(
+                pagina,
+                tamanio,
+                estado,
+                busqueda);
 
         Page<ReporteResumenDto> dtoPage = page.map(this::toDto);
 
-        log.info("Listar reportes: pagina={}, estado={}, busqueda={}, total={}", pagina, estado, busqueda, dtoPage.getTotalElements());
+        log.info("Listar reportes: pagina={}, estado={}, busqueda={}, total={}", pagina, estado, busqueda,
+                dtoPage.getTotalElements());
         return ResponseEntity.ok(new PaginaDto<>(
                 dtoPage.getContent(),
                 dtoPage.getNumber(),
                 dtoPage.getTotalPages(),
-                dtoPage.getTotalElements()
-        ));
+                dtoPage.getTotalElements()));
     }
 
-    // ── GET /admin/reportes/{id} ──────────────────────────────────────────
     @GetMapping("/{id}")
     public ResponseEntity<ReporteResumenDto> obtener(@PathVariable Integer id) {
-        return reporteRepository.findById(id)
-                .map(r -> ResponseEntity.ok(toDto(r)))
+        return reporteService.obtener(id)
+                .map(reporte -> ResponseEntity.ok(toDto(reporte)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // ── PATCH /admin/reportes/{id}/estado ─────────────────────────────────
+    /**
+     * URL firmada para descargar la evidencia. El bucket es privado, asi que el
+     * navegador no puede cargar la imagen solo con la ruta guardada.
+     */
+    @GetMapping("/{id}/imagen")
+    public ResponseEntity<Map<String, String>> imagen(@PathVariable Integer id) {
+
+        Reporte reporte = reporteService.obtener(id).orElse(null);
+
+        if (reporte == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("mensaje", "El reporte #" + id + " no existe."));
+        }
+
+        String url = supabaseStorageService.urlPublica(reporte.getImagenUrl());
+
+        if (url == null) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("mensaje", "El reporte no tiene imagen registrada."));
+        }
+
+        return ResponseEntity.ok(Map.of("url", url));
+    }
+
     @PatchMapping("/{id}/estado")
     public ResponseEntity<ReporteResumenDto> actualizarEstado(
             @PathVariable Integer id,
             @Valid @RequestBody ActualizarEstadoDto dto) {
 
-        Optional<Reporte> opt = reporteRepository.findById(id);
-        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        Optional<Reporte> actualizado = reporteService.actualizarEstado(id, dto.estado());
+        if (actualizado.isEmpty())
+            return ResponseEntity.notFound().build();
 
-        Reporte r = opt.get();
-        String anterior = r.getEstado();
-        r.setEstado(dto.estado());
-        reporteRepository.save(r);
-
-        log.info("Reporte #{}: {} → {}", id, anterior, dto.estado());
-        return ResponseEntity.ok(toDto(r));
+        log.info("Reporte #{}: actualizado a {}", id, dto.estado());
+        return ResponseEntity.ok(toDto(actualizado.get()));
     }
 
-    // ── GET /admin/reportes/estadisticas ──────────────────────────────────
     @GetMapping("/estadisticas")
     public ResponseEntity<EstadisticasDto> estadisticas() {
-        long total      = reporteRepository.contarTotal();
-        long pendientes = reporteRepository.countByEstado("PENDIENTE");
-        long enProceso  = reporteRepository.countByEstado("EN_PROCESO");
-        long resueltos  = reporteRepository.countByEstado("RESUELTO");
-        long duplicados = reporteRepository.countByEstado("DUPLICADO");
 
-        log.info("Estadísticas: total={}, pendientes={}, enProceso={}, resueltos={}", total, pendientes, enProceso, resueltos);
-        return ResponseEntity.ok(new EstadisticasDto(total, pendientes, enProceso, resueltos, duplicados));
+        return ResponseEntity.ok(reporteService.obtenerEstadisticas());
     }
 
-    // ── POST /admin/reportes ──────────────────────────────────────────────
     @PostMapping
     public ResponseEntity<ReporteResumenDto> crear(@RequestBody Reporte body) {
-        Reporte r = new Reporte();
-        r.setIdUsuario(body.getIdUsuario() != null ? body.getIdUsuario() : 1);
-        r.setIdVia(body.getIdVia());
-        r.setImagenUrl(body.getImagenUrl() != null ? body.getImagenUrl() : "");
-        r.setDescripcion(body.getDescripcion());
-        r.setEstado("PENDIENTE");
-        r.setEsPreprueba(false);
-        r.setFechaCreacion(java.time.OffsetDateTime.now());
 
-        Reporte saved = reporteRepository.save(r);
-        log.info("Reporte creado: #{}", saved.getIdReporte());
+        Reporte saved = reporteService.crear(body);
+
+        log.info(
+                "Reporte creado #{}",
+                saved.getIdReporte());
+
         return ResponseEntity.status(201).body(toDto(saved));
     }
 
-    // ── DELETE /admin/reportes/{id} ───────────────────────────────────────
+    /**
+     * Anulacion logica: el reporte deja de aparecer en el listado pero la fila y
+     * su bitacora de tiempos se conservan.
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        if (!reporteRepository.existsById(id)) return ResponseEntity.notFound().build();
-        reporteRepository.deleteById(id);
-        log.info("Reporte #{} eliminado", id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Map<String, String>> eliminar(
+            @PathVariable Integer id) {
+
+        boolean anulado = reporteService.eliminar(id);
+
+        if (!anulado) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(
+                            "mensaje", "El reporte #" + id
+                                    + " no existe o ya estaba anulado."));
+        }
+
+        log.info(
+                "Reporte #{} anulado logicamente",
+                id);
+
+        return ResponseEntity
+                .ok()
+                .body(Map.of("mensaje", "Reporte #" + id + " anulado."));
     }
 
-    // ── Mapper interno ────────────────────────────────────────────────────
     private ReporteResumenDto toDto(Reporte r) {
         return new ReporteResumenDto(
                 r.getIdReporte(),
@@ -124,7 +155,6 @@ public class ReporteController {
                 r.getImagenUrl(),
                 r.getDescripcion(),
                 r.getEstado(),
-                r.getFechaCreacion()
-        );
+                r.getFechaCreacion());
     }
 }

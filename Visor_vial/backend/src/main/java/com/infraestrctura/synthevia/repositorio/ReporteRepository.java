@@ -16,6 +16,7 @@ public interface ReporteRepository extends JpaRepository<Reporte, Integer> {
     Page<Reporte> findByEstadoOrderByFechaCreacionDesc(String estado, Pageable pageable);
 
     @Query("SELECT r FROM Reporte r WHERE " +
+           "r.eliminadoEn IS NULL AND " +
            "(:estado IS NULL OR r.estado = :estado) AND " +
            "(:busqueda IS NULL OR :busqueda = '' OR " +
            "LOWER(r.descripcion) LIKE LOWER(CONCAT('%', :busqueda, '%')) OR " +
@@ -30,6 +31,12 @@ public interface ReporteRepository extends JpaRepository<Reporte, Integer> {
 
     long countByEstado(String estado);
 
-    @Query("SELECT COUNT(r) FROM Reporte r")
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.eliminadoEn IS NULL")
     long contarTotal();
+
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.eliminadoEn IS NULL AND r.estado = :estado")
+    long contarActivosPorEstado(@Param("estado") String estado);
+
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.eliminadoEn IS NOT NULL")
+    long contarAnulados();
 }

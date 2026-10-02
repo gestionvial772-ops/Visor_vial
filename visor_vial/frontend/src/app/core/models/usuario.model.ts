@@ -5,7 +5,7 @@ export interface Usuario{
     dni: string;
     nombre: string;
     apellidos: string;
-    correoEletronico: string;
+    correoElectronico: string;
     rol: Rol;
     reportesHoy: number;
     fechaUltimoReporte: string | null;
@@ -13,15 +13,17 @@ export interface Usuario{
 }
 
 
-export interface UsuarioRegistro{
-    dni: string,
-    nombre: string,
-    apellidos: string,
-    correoElectronico: string,
-    contrasena: string;
+export interface UsuarioRegistro {
+  nombre: string;
+  apellidos: string;
+  correoElectronico: string;
+  dni: string;
+  contrasena: string;
+  captchaToken: string;
 }
-
 export interface UsuarioLogin{
     dni: string,
     contrasena: string;
+    captchaToken: string;
+    recordarme: boolean;
 }

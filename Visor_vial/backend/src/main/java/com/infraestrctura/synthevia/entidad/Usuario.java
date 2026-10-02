@@ -1,7 +1,10 @@
 package com.infraestrctura.synthevia.entidad;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+
 
 @Entity
 @Table(name = "usuario")
@@ -34,38 +37,88 @@ public class Usuario {
     private Short reportesHoy;
 
     @Column(name = "fecha_ultimo_reporte")
-    private OffsetDateTime fechaUltimoReporte;
+    private LocalDate fechaUltimoReporte;
 
     @Column(name = "fecha_creacion")
     private OffsetDateTime fechaCreacion;
 
-    public Integer getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
+    public Integer getIdUsuario() {
+        return idUsuario;
+    }
 
-    public String getDni() { return dni; }
-    public void setDni(String dni) { this.dni = dni; }
+    public void setIdUsuario(Integer idUsuario) {
+        this.idUsuario = idUsuario;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getDni() {
+        return dni;
+    }
 
-    public String getApellidos() { return apellidos; }
-    public void setApellidos(String apellidos) { this.apellidos = apellidos; }
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
 
-    public String getCorreoElectronico() { return correoElectronico; }
-    public void setCorreoElectronico(String correoElectronico) { this.correoElectronico = correoElectronico; }
+    public String getNombre() {
+        return nombre;
+    }
 
-    public String getContrasenaHash() { return contrasenaHash; }
-    public void setContrasenaHash(String contrasenaHash) { this.contrasenaHash = contrasenaHash; }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-    public String getRol() { return rol; }
-    public void setRol(String rol) { this.rol = rol; }
+    public String getApellidos() {
+        return apellidos;
+    }
 
-    public Short getReportesHoy() { return reportesHoy; }
-    public void setReportesHoy(Short reportesHoy) { this.reportesHoy = reportesHoy; }
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
 
-    public OffsetDateTime getFechaUltimoReporte() { return fechaUltimoReporte; }
-    public void setFechaUltimoReporte(OffsetDateTime fechaUltimoReporte) { this.fechaUltimoReporte = fechaUltimoReporte; }
+    public String getCorreoElectronico() {
+        return correoElectronico;
+    }
 
-    public OffsetDateTime getFechaCreacion() { return fechaCreacion; }
-    public void setFechaCreacion(OffsetDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+    public void setCorreoElectronico(String correoElectronico) {
+        this.correoElectronico = correoElectronico;
+    }
+
+    public String getContrasenaHash() {
+        return contrasenaHash;
+    }
+
+    public void setContrasenaHash(String contrasenaHash) {
+        this.contrasenaHash = contrasenaHash;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
+    public Short getReportesHoy() {
+        return reportesHoy;
+    }
+
+    public void setReportesHoy(Short reportesHoy) {
+        this.reportesHoy = reportesHoy;
+    }
+
+    public LocalDate getFechaUltimoReporte() {
+        return fechaUltimoReporte;
+    }
+
+    public void setFechaUltimoReporte(LocalDate fechaUltimoReporte) {
+        this.fechaUltimoReporte = fechaUltimoReporte;
+    }
+
+    public OffsetDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(OffsetDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
 }

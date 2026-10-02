@@ -5,7 +5,7 @@ export interface Reporte{
     idReporte: number,
     idUsuario: number,
     idVia: number | null,
-    reporteOriginalId: string | null,
+    reporteOriginalId: number | null,
     imagenUrl: string,
     descripcion: string | null,
     estado: Estado;
@@ -31,19 +31,54 @@ export interface Clasificacion {
   idReporte: number;
   severidad: 1 | 2 | 3;
   etiquetaDetectada: string | null;
-  nivelConfianza: number; // 0 a 100
+  nivelConfianza: number; 
   modeloIaUtilizado: string;
 }
 
-export interface ReporteDetalle extends Reporte {
-  coordenada?: Coordenada;
-  clasificacion?: Clasificacion;
+export interface CrearReporteRequest {
+  idVia: number | null;
+  descripcion: string;
+  latitud: number;
+  longitud: number;
+  precisionReportadaMetros: number | null;
+  instanteInicioCaptura: string;
 }
 
+/** Fila de la tabla de deteriorateos que muestra el panel del administrador */
+export interface TipoDanoFila {
+  codigo: string;
+  etiqueta: string;
+  detectado: boolean;
+  cantidad: number;
+  confianza: number | null;
+}
 
-export interface NuevoReporte {
-  idVia?: number;
-  imagenUrl: string;
-  descripcion?: string;
-  puntoCapturado: PuntoGeografico;
+/** Resultado del analisis de imagenes con Gemini */
+export interface AnalisisIa {
+  idReporte: number;
+  disponible: boolean;
+  tieneDano: boolean;
+  cantidadDanos: number;
+  severidad: 1 | 2 | 3;
+  severidadEtiqueta: string;
+  tiposDano: TipoDanoFila[];
+  nivelConfianza: number | null;
+  modeloIaUtilizado: string;
+  versionModelo: string | null;
+  reporteBreve: string | null;
+  fechaProcesamiento: string;
+}
+
+export interface CoordenadaReporte {
+  latitud: number | null;
+  longitud: number | null;
+  precisionReportadaMetros: number | null;
+  fechaCaptura: string;
+}
+
+/** Refleja el ReporteDetalleDto del backend: el reporte viene anidado */
+export interface ReporteDetalle {
+  reporte: Reporte;
+  coordenada: CoordenadaReporte | null;
+  analisis: AnalisisIa | null;
 }
