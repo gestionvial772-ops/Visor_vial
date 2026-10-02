@@ -48,6 +48,11 @@ public class RegistroTiempoService {
         );
     }
 
+    /**
+     * El analisis con IA ya no se ejecuta al registrar el reporte, solo cuando
+     * el administrador pulsa Reanalizar. Por eso la etapa PROCESAMIENTO_IA se
+     * registra desde el endpoint de reanalisis, no desde ReporteService.
+     */
     @Transactional
     public RegistroTiempo registrarProcesamientoIa(
             Integer idReporte) {

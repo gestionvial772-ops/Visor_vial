@@ -2,6 +2,8 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReportesService, ReporteResumen, Estadisticas, NuevoReporteDto, ViaSegmento } from '../../../../core/services/reportes.service';
+import { AnalisisService } from '../../../../core/services/analisis.service';
+import { AnalisisIa, CoordenadaReporte } from '../../../../core/models/reporte.model';
 import { ToastService } from '../../../../core/services/toast.service';
 
 /** Pipe helper: devuelve el menor de dos números (usado en la paginación del pie) */
@@ -23,6 +25,7 @@ export class MinPipe implements PipeTransform {
 export class Reportes implements OnInit {
   private svc   = inject(ReportesService);
   private toast = inject(ToastService);
+  private analisisSvc = inject(AnalisisService);
 
   // Estado de la lista
   reportes       = signal<ReporteResumen[]>([]);
@@ -45,6 +48,26 @@ export class Reportes implements OnInit {
 
   // Modal — ver detalle (solo lectura)
   reporteVista        = signal<ReporteResumen | null>(null);
+
+  // Panel de análisis de IA
+  analisis            = signal<AnalisisIa | null>(null);
+  coordenadaDetalle   = signal<CoordenadaReporte | null>(null);
+  cargandoAnalisis    = signal(false);
+  reanalizando        = signal(false);
+
+  /**
+   * URLs firmadas de las imágenes indexadas por idReporte. El bucket de
+   * Supabase Storage es privado, asi que la ruta guardada en imagen_url no la
+   * puede cargar el navegador. Debe ser un signal: si fuera un Map comun,
+   * Angular no detectaria el cambio cuando llega la URL y las miniaturas
+   * quedarian en blanco hasta que otra accion dispare el render.
+   */
+  private readonly imagenes = signal<Record<number, string>>({});
+
+  /** URL lista para el <img> de un reporte, o null si aún no se resolvió. */
+  urlImagen(idReporte: number): string | null {
+    return this.imagenes()[idReporte] ?? null;
+  }
 
   // Modal — editar estado
   reporteSeleccionado = signal<ReporteResumen | null>(null);
@@ -115,11 +138,29 @@ export class Reportes implements OnInit {
         this.totalPaginas.set(p.totalPaginas);
         this.paginaActual.set(p.paginaActual);
         this.cargando.set(false);
+        p.contenido.forEach((r) => this.resolverImagen(r.idReporte));
       },
       error: () => {
         this.cargando.set(false);
         this.errorCarga.set(true);
       },
+    });
+  }
+
+  /**
+   * Pide al backend la URL firmada de cada imagen. Los reportes creados con una
+   * URL publica ya funcionan sin esto, pero los subida a Storage no.
+   */
+  private resolverImagen(idReporte: number): void {
+    if (idReporte in this.imagenes()) {
+      return;
+    }
+
+    this.analisisSvc.obtenerImagen(idReporte).subscribe({
+      next: (r) =>
+        this.imagenes.update((mapa) => ({ ...mapa, [idReporte]: r.url })),
+      error: () =>
+        this.imagenes.update((mapa) => ({ ...mapa, [idReporte]: '' })),
     });
   }
 
@@ -143,16 +184,93 @@ export class Reportes implements OnInit {
   // ── Modal Ver ─────────────────────────────────────────────────────────────
   abrirVista(r: ReporteResumen): void {
     this.reporteVista.set(r);
+    this.cargarAnalisis(r.idReporte);
+    this.resolverImagen(r.idReporte);
   }
 
   cerrarVista(): void {
     this.reporteVista.set(null);
+    this.analisis.set(null);
+    this.coordenadaDetalle.set(null);
+  }
+
+  /** URL a usar en el <img>: la firmada si se pudo resolver, si no la original. */
+  srcImagen(reporte: ReporteResumen | null): string | null {
+    if (!reporte) {
+      return null;
+    }
+
+    const firmadas = this.imagenes();
+
+    if (reporte.idReporte in firmadas) {
+      const firmada = firmadas[reporte.idReporte];
+      return firmada ? firmada : reporte.imagenUrl;
+    }
+
+    // los reportes con URL publica funcionan sin pedir la firma
+    return reporte.imagenUrl?.startsWith('http') ? reporte.imagenUrl : null;
+  }
+
+  private cargarAnalisis(idReporte: number): void {
+    this.analisis.set(null);
+    this.coordenadaDetalle.set(null);
+    this.cargandoAnalisis.set(true);
+
+    this.analisisSvc.obtenerDetalle(idReporte).subscribe({
+      next: (detalle) => {
+        this.analisis.set(detalle.analisis);
+        this.coordenadaDetalle.set(detalle.coordenada);
+        this.cargandoAnalisis.set(false);
+      },
+      error: () => {
+        this.analisis.set(null);
+        this.cargandoAnalisis.set(false);
+      },
+    });
+  }
+
+  reanalizar(): void {
+    const r = this.reporteVista();
+    if (!r || this.reanalizando()) {
+      return;
+    }
+
+    this.reanalizando.set(true);
+
+    this.analisisSvc.reanalizar(r.idReporte).subscribe({
+      next: () => {
+        this.reanalizando.set(false);
+        this.toast.mostrar(
+          `Reporte #${r.idReporte} analizado`,
+          true,
+          'Análisis completado',
+        );
+        this.cargarAnalisis(r.idReporte);
+      },
+      error: (err) => {
+        this.reanalizando.set(false);
+
+        const detalle = err?.error?.detalle;
+        const mensaje = err?.error?.mensaje;
+
+        this.toast.mostrar(
+          detalle ? `${mensaje} (${detalle})` : mensaje || 'No se pudo completar el reanálisis con IA',
+          false,
+          'Falló el análisis',
+        );
+      },
+    });
+  }
+
+  claseSeveridad(severidad: number): string {
+    return `sev-${severidad}`;
   }
 
   // ── Modal Editar ──────────────────────────────────────────────────────────
   abrirDetalle(r: ReporteResumen): void {
     this.reporteSeleccionado.set(r);
     this.nuevoEstado.set(r.estado);
+    this.resolverImagen(r.idReporte);
   }
 
   cerrarDetalle(): void {
@@ -168,7 +286,8 @@ export class Reportes implements OnInit {
         this.guardandoEstado.set(false);
         this.toast.mostrar(
           `Reporte #${r.idReporte} actualizado a "${this.etiquetaEstado(actualizado.estado)}"`,
-          true
+          true,
+          'Estado actualizado'
         );
         this.cerrarDetalle();
         this.cargarReportes(this.paginaActual());
@@ -176,7 +295,7 @@ export class Reportes implements OnInit {
       },
       error: () => {
         this.guardandoEstado.set(false);
-        this.toast.mostrar('No se pudo actualizar el estado', false);
+        this.toast.mostrar('No se pudo actualizar el estado', false, 'No se pudo guardar');
       },
     });
   }
@@ -197,14 +316,18 @@ export class Reportes implements OnInit {
     this.svc.eliminar(r.idReporte).subscribe({
       next: () => {
         this.eliminando.set(false);
-        this.toast.mostrar(`Reporte #${r.idReporte} eliminado`, true);
+        this.toast.mostrar(`Reporte #${r.idReporte} anulado`, true, 'Reporte anulado');
         this.cancelarEliminar();
         this.cargarReportes(this.paginaActual());
         this.cargarEstadisticas();
       },
-      error: () => {
+      error: (err) => {
         this.eliminando.set(false);
-        this.toast.mostrar('No se pudo eliminar el reporte', false);
+        this.toast.mostrar(
+          err?.error?.mensaje || 'No se pudo anular el reporte',
+          false,
+          'No se pudo anular',
+        );
       },
     });
   }
@@ -242,7 +365,7 @@ export class Reportes implements OnInit {
 
   guardarNuevo(): void {
     if (!this.nuevoForm.imagenUrl.trim()) {
-      this.toast.mostrar('La URL de imagen es obligatoria', false);
+      this.toast.mostrar('La URL de imagen es obligatoria', false, 'Faltan datos');
       return;
     }
     this.guardandoNuevo.set(true);
@@ -255,14 +378,18 @@ export class Reportes implements OnInit {
     this.svc.crear(dto).subscribe({
       next: (r) => {
         this.guardandoNuevo.set(false);
-        this.toast.mostrar(`Reporte #${r.idReporte} creado correctamente`, true);
+        this.toast.mostrar(
+          `Reporte #${r.idReporte} creado correctamente`,
+          true,
+          'Reporte creado'
+        );
         this.cerrarModalNuevo();
         this.cargarReportes(0);
         this.cargarEstadisticas();
       },
       error: () => {
         this.guardandoNuevo.set(false);
-        this.toast.mostrar('No se pudo crear el reporte', false);
+        this.toast.mostrar('No se pudo crear el reporte', false, 'No se pudo crear');
       },
     });
   }

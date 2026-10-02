@@ -54,17 +54,17 @@ export class Login {
         next: (res) => {
           if (res.exito && res.nombre && res.rol) {
             this.session.iniciar({ nombre: res.nombre, rol: res.rol });
-            this.toast.mostrar(res.mensaje, true);
+            this.toast.mostrar(res.mensaje, true, 'Inicio de sesión exitoso');
             if (res.rol === 'ADMIN') {
               this.router.navigate(['/admin/dashboard']);
             } else {
               this.router.navigate(['/ciudadano/nuevo-reporte']);
             }
           } else {
-            this.toast.mostrar(res.mensaje, false);
+            this.toast.mostrar(res.mensaje, false, 'No se pudo iniciar sesión');
           }
         },
-        error: () => this.toast.mostrar('Error de conexión con el servidor', false),
+        error: () => this.toast.mostrar('Error de conexión con el servidor', false, 'Sin conexión'),
       });
   }
 }

@@ -21,3 +21,4 @@ dist/
 .vscode/
 .DS_Store
 Thumbs.db
+visor_vial/backend/src/main/java/com/infraestrctura/synthevia/resources/application.properties

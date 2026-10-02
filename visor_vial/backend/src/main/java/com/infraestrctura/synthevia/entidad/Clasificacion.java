@@ -35,6 +35,15 @@ public class Clasificacion {
     @Column(name = "fecha_procesamiento", nullable = false)
     private OffsetDateTime fechaProcesamiento;
 
+    @Column(name = "tiene_dano", nullable = false)
+    private Boolean tieneDano = Boolean.FALSE;
+
+    @Column(name = "cantidad_danos", nullable = false)
+    private Short cantidadDanos = 0;
+
+    @Column(name = "reporte_breve", columnDefinition = "TEXT")
+    private String reporteBreve;
+
     @PrePersist
     protected void prePersist() {
 
@@ -117,5 +126,32 @@ public class Clasificacion {
             OffsetDateTime fechaProcesamiento) {
 
         this.fechaProcesamiento = fechaProcesamiento;
+    }
+
+    public Boolean getTieneDano() {
+        return tieneDano;
+    }
+
+    public void setTieneDano(Boolean tieneDano) {
+
+        this.tieneDano = tieneDano;
+    }
+
+    public Short getCantidadDanos() {
+        return cantidadDanos;
+    }
+
+    public void setCantidadDanos(Short cantidadDanos) {
+
+        this.cantidadDanos = cantidadDanos;
+    }
+
+    public String getReporteBreve() {
+        return reporteBreve;
+    }
+
+    public void setReporteBreve(String reporteBreve) {
+
+        this.reporteBreve = reporteBreve;
     }
 }

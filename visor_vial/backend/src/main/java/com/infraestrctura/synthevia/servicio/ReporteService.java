@@ -50,6 +50,14 @@ public class ReporteService {
                 pageable);
     }
 
+    /**
+     * Reportes dados de baja por anulacion logica. No se expone como endpoint
+     * todavia; queda disponible para la/exportacion de evidencia.
+     */
+    public long contarAnulados() {
+        return reporteRepository.contarAnulados();
+    }
+
     public Optional<Reporte> obtener(Integer id) {
         return reporteRepository.findById(id);
     }
@@ -97,14 +105,32 @@ public class ReporteService {
         return reporteRepository.save(reporte);
     }
 
+    /**
+     * Anulacion logica. No se borra la fila porque registro_tiempo tiene un
+     * trigger que la vuelve inalterable (regla RNF11) y su bitacora debe
+     * conservarse para la trazabilidad de las mediciones. Los reportes anulados
+     * quedan fuera del listado y de las estadisticas.
+     */
     @Transactional
     public boolean eliminar(Integer id) {
 
-        if (!reporteRepository.existsById(id)) {
+        Optional<Reporte> reporteOpt = reporteRepository.findById(id);
+
+        if (reporteOpt.isEmpty()) {
             return false;
         }
 
-        reporteRepository.deleteById(id);
+        Reporte reporte = reporteOpt.get();
+
+        if (reporte.estaAnulado()) {
+            return false;
+        }
+
+        reporte.setEliminadoEn(OffsetDateTime.now());
+
+        reporteRepository.save(reporte);
+
+        log.info("Reporte #{} anulado logicamente", id);
 
         return true;
     }
@@ -166,6 +192,8 @@ public class ReporteService {
 
             imagenSubida = true;
 
+            registroTiempoService.registrarConsolidacion(guardado.getIdReporte());
+
             return guardado;
 
         } catch (RuntimeException e) {
@@ -176,20 +204,27 @@ public class ReporteService {
         }
     }
 
+    /**
+     * El analisis con IA no se ejecuta al registrar el reporte. El ciudadano
+     * solo reporta: la llamada a Gemini tarda varios segundos y hacia que el
+     * usuario abandona el formulario. El analisis queda a cargo del
+     * administrador mediante el boton Reanalizar del panel.
+     */
+
     public EstadisticasDto obtenerEstadisticas() {
 
         long total = reporteRepository.contarTotal();
 
-        long pendientes = reporteRepository.countByEstado(
+        long pendientes = reporteRepository.contarActivosPorEstado(
                 "PENDIENTE");
 
-        long enProceso = reporteRepository.countByEstado(
+        long enProceso = reporteRepository.contarActivosPorEstado(
                 "EN_PROCESO");
 
-        long resueltos = reporteRepository.countByEstado(
+        long resueltos = reporteRepository.contarActivosPorEstado(
                 "RESUELTO");
 
-        long duplicados = reporteRepository.countByEstado(
+        long duplicados = reporteRepository.contarActivosPorEstado(
                 "DUPLICADO");
 
         return new EstadisticasDto(

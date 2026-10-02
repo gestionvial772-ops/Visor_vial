@@ -6,14 +6,17 @@ import com.infraestrctura.synthevia.dto.PaginaDto;
 import com.infraestrctura.synthevia.dto.ReporteResumenDto;
 import com.infraestrctura.synthevia.entidad.Reporte;
 import com.infraestrctura.synthevia.servicio.ReporteService;
+import com.infraestrctura.synthevia.servicio.SupabaseStorageService;
 import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -22,9 +25,13 @@ public class ReporteController {
 
     private static final Logger log = LoggerFactory.getLogger(ReporteController.class);
     private final ReporteService reporteService;
+    private final SupabaseStorageService supabaseStorageService;
 
-    public ReporteController(ReporteService reporteService) {
+    public ReporteController(
+            ReporteService reporteService,
+            SupabaseStorageService supabaseStorageService) {
         this.reporteService = reporteService;
+        this.supabaseStorageService = supabaseStorageService;
     }
 
     @GetMapping
@@ -58,6 +65,30 @@ public class ReporteController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * URL firmada para descargar la evidencia. El bucket es privado, asi que el
+     * navegador no puede cargar la imagen solo con la ruta guardada.
+     */
+    @GetMapping("/{id}/imagen")
+    public ResponseEntity<Map<String, String>> imagen(@PathVariable Integer id) {
+
+        Reporte reporte = reporteService.obtener(id).orElse(null);
+
+        if (reporte == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("mensaje", "El reporte #" + id + " no existe."));
+        }
+
+        String url = supabaseStorageService.urlPublica(reporte.getImagenUrl());
+
+        if (url == null) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("mensaje", "El reporte no tiene imagen registrada."));
+        }
+
+        return ResponseEntity.ok(Map.of("url", url));
+    }
+
     @PatchMapping("/{id}/estado")
     public ResponseEntity<ReporteResumenDto> actualizarEstado(
             @PathVariable Integer id,
@@ -89,25 +120,31 @@ public class ReporteController {
         return ResponseEntity.status(201).body(toDto(saved));
     }
 
+    /**
+     * Anulacion logica: el reporte deja de aparecer en el listado pero la fila y
+     * su bitacora de tiempos se conservan.
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(
+    public ResponseEntity<Map<String, String>> eliminar(
             @PathVariable Integer id) {
 
-        boolean eliminado = reporteService.eliminar(id);
+        boolean anulado = reporteService.eliminar(id);
 
-        if (!eliminado) {
+        if (!anulado) {
             return ResponseEntity
-                    .notFound()
-                    .build();
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(
+                            "mensaje", "El reporte #" + id
+                                    + " no existe o ya estaba anulado."));
         }
 
         log.info(
-                "Reporte #{} eliminado",
+                "Reporte #{} anulado logicamente",
                 id);
 
         return ResponseEntity
-                .noContent()
-                .build();
+                .ok()
+                .body(Map.of("mensaje", "Reporte #" + id + " anulado."));
     }
 
     private ReporteResumenDto toDto(Reporte r) {

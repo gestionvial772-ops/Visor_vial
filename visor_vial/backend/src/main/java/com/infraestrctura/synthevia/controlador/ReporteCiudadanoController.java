@@ -45,6 +45,10 @@ public class ReporteCiudadanoController {
 
       log.info("Reporte ciudadano creado: #{}", reporte.getIdReporte());
 
+      // El reporte se registra SIN analisis de IA. El ciudadano solo reporta:
+      // la llamada a Gemini tarda varios segundos y hacia que el usuario
+      // abandona el formulario. La clasificacion la genera el administrador
+      // desde el panel con el boton Reanalizar.
       return ResponseEntity
             .status(201)
             .body(toDto(reporte));

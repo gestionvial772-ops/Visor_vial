@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(24)
 	}
 }
 
@@ -32,6 +32,13 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Los fuentes estan en UTF-8, pero en Windows el compilador usaria por
+// defecto Windows-1252 y los acentos quedarian corruptos en los textos en
+// espanol que se devuelven al frontend.
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
 }
 
 tasks.named('test') {

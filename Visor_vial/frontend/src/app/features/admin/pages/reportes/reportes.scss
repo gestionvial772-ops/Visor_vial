@@ -684,7 +684,7 @@ $col-duplicado-bg:   #f3f4f6; $col-duplicado-text:  #4b5563; $col-duplicado-dot:
   overflow-y: auto;
   animation: modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
-  &--vista  { max-width: 560px; }
+  &--vista  { max-width: 720px; }
 }
 
 @keyframes modal-in {
@@ -1544,5 +1544,242 @@ $col-duplicado-bg:   #f3f4f6; $col-duplicado-text:  #4b5563; $col-duplicado-dot:
 
 .form-hint {
   font-size: 0.72rem;
+  color: $muted;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PANEL DE ANÁLISIS DE IA
+// ═══════════════════════════════════════════════════════════════════════════
+.ia-panel {
+  border: 1px solid $primary-light;
+  border-radius: $radius-card;
+  background: $primary-xlight;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ia-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ia-head-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ia-head-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: $primary;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.ia-head-title {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: $ink;
+  line-height: 1.2;
+}
+
+.ia-head-sub {
+  display: block;
+  font-size: 0.7rem;
+  color: $muted;
+  line-height: 1.3;
+}
+
+.btn-ia-reanalizar {
+  border: 1px solid $primary;
+  background: $surface;
+  color: $primary;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: $radius-badge;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover:not(:disabled) { background: $primary; color: #fff; }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+.ia-estado {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 4px;
+  color: $muted;
+  font-size: 0.8rem;
+  justify-content: center;
+
+  &--vacio i { font-size: 1rem; color: $col-proceso-dot; }
+}
+
+// ── Veredicto ───────────────────────────────────────────────────────────────
+.ia-veredicto {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: $surface;
+  border: 1px solid $hairline;
+  border-radius: 11px;
+  padding: 12px 14px;
+
+  @media (max-width: 520px) { grid-template-columns: 1fr 1fr; }
+}
+
+.ia-veredicto-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ia-dato-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $muted;
+}
+
+.ia-dato-valor {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.ia-si { color: #b91c1c; }
+.ia-no { color: $muted; }
+
+.ia-badge-sev {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: $radius-badge;
+
+  &.sev-1 { background: $col-resuelto-bg; color: $col-resuelto-text; }
+  &.sev-2 { background: $col-pendiente-bg; color: $col-pendiente-text; }
+  &.sev-3 { background: #fee2e2; color: #991b1b; }
+}
+
+// ── Tabla de deteriorateos ──────────────────────────────────────────────────
+.ia-tabla-wrap {
+  background: $surface;
+  border: 1px solid $hairline;
+  border-radius: 11px;
+  overflow: hidden;
+}
+
+.ia-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.79rem;
+}
+
+.ia-tabla thead th {
+  background: $canvas;
+  color: $muted;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid $hairline;
+}
+
+.ia-tabla tbody td {
+  padding: 7px 12px;
+  border-bottom: 1px solid $hairline;
+  color: $body;
+}
+
+.ia-tabla tbody tr:last-child td { border-bottom: none; }
+
+.ia-fila-activa {
+  background: rgba(26, 84, 74, 0.05);
+
+  .ia-col-tipo { color: $ink; font-weight: 700; }
+}
+
+.ia-col-si, .ia-col-cant, .ia-col-conf {
+  width: 88px;
+  text-align: center;
+}
+
+.ia-si-no {
+  font-weight: 700;
+  font-size: 0.74rem;
+}
+
+.ia-cantidad {
+  display: inline-block;
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: $radius-badge;
+  background: $primary-light;
+  color: $primary;
+  font-weight: 700;
+  font-size: 0.74rem;
+}
+
+.ia-conf {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: $primary;
+}
+
+.ia-vacio { color: $hairline; font-weight: 700; }
+
+// ── Reporte breve ───────────────────────────────────────────────────────────
+.ia-reporte {
+  background: $surface;
+  border: 1px solid $hairline;
+  border-left: 3px solid $primary;
+  border-radius: 10px;
+  padding: 11px 13px;
+}
+
+.ia-reporte-label {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $muted;
+  margin-bottom: 5px;
+}
+
+.ia-reporte-texto {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: $body;
+}
+
+.ia-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.7rem;
   color: $muted;
 }

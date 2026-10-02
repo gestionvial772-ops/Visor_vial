@@ -30,6 +30,14 @@ public class Reporte {
     @Column(name = "reporte_original_id")
     private Integer reporteOriginalId;
 
+    /**
+     * Anulacion logica. La fila no se borra porque registro_tiempo tiene un
+     * trigger que la vuelve inalterable (regla RNF11) y su bitacora debe
+     * conservarse para la trazabilidad de las mediciones.
+     */
+    @Column(name = "eliminado_en")
+    private OffsetDateTime eliminadoEn;
+
     @Column(name = "fecha_creacion", nullable = false)
     private OffsetDateTime fechaCreacion;
 
@@ -97,6 +105,18 @@ public class Reporte {
 
     public void setReporteOriginalId(Integer v) {
         this.reporteOriginalId = v;
+    }
+
+    public OffsetDateTime getEliminadoEn() {
+        return eliminadoEn;
+    }
+
+    public void setEliminadoEn(OffsetDateTime v) {
+        this.eliminadoEn = v;
+    }
+
+    public boolean estaAnulado() {
+        return eliminadoEn != null;
     }
 
     public OffsetDateTime getFechaCreacion() {

@@ -150,20 +150,18 @@ export class NuevoReporte implements OnInit {
         next: (respuesta) => {
           console.log('Reporte registrado correctamente:', respuesta);
 
-          this.mensajeExito = 'El reporte fue registrado correctamente.';
-
+          this.mensajeExito =
+            'Reporte registrado. El personal municipal lo revisará.';
           this.mensajeError = '';
-
           this.cdr.detectChanges();
         },
 
         error: (error) => {
           console.error('Error al registrar el reporte:', error);
 
-          this.mensajeError = 'No fue posible registrar el reporte. Inténtalo nuevamente.';
-
+          this.mensajeError =
+            'No fue posible registrar el reporte. Inténtalo nuevamente.';
           this.mensajeExito = '';
-
           this.cdr.detectChanges();
         },
       });

@@ -183,8 +183,8 @@
                 <span class="id-chip">#{{ r.idReporte }}</span>
               </td>
               <td class="col-img">
-                @if (r.imagenUrl) {
-                  <img [src]="r.imagenUrl"
+                @if (srcImagen(r); as src) {
+                  <img [src]="src"
                        alt="Reporte #{{ r.idReporte }}"
                        class="thumb"
                        (error)="onImgError($event)" />
@@ -226,8 +226,8 @@
                   <button class="btn-accion btn-accion--editar" (click)="abrirDetalle(r)" title="Editar estado">
                     <i class="bi bi-pencil"></i> Editar
                   </button>
-                  <button class="btn-accion btn-accion--eliminar" (click)="confirmarEliminar(r)" title="Eliminar reporte">
-                    <i class="bi bi-trash3"></i> Eliminar
+                  <button class="btn-accion btn-accion--eliminar" (click)="confirmarEliminar(r)" title="Anular reporte">
+                    <i class="bi bi-trash3"></i> Anular
                   </button>
                 </div>
               </td>
@@ -301,9 +301,9 @@
       </div>
 
       <!-- Imagen hero -->
-      @if (reporteVista()!.imagenUrl) {
+      @if (srcImagen(reporteVista()); as srcDetalle) {
         <div class="modal-hero">
-          <img [src]="reporteVista()!.imagenUrl"
+          <img [src]="srcDetalle"
                alt="Imagen del reporte #{{ reporteVista()!.idReporte }}"
                class="modal-hero-img"
                (error)="onImgError($event)" />
@@ -329,6 +329,137 @@
             {{ reporteVista()!.descripcion || 'Sin descripción registrada.' }}
           </p>
         </div>
+
+        <!-- ══ ANÁLISIS DE IA ══════════════════════════════════════════════ -->
+        <section class="ia-panel">
+
+          <div class="ia-panel-head">
+            <div class="ia-head-left">
+              <span class="ia-head-icon"><i class="bi bi-stars"></i></span>
+              <div>
+                <span class="ia-head-title">Análisis de inteligencia artificial</span>
+                <span class="ia-head-sub">Clasificación automática del deterioro vial</span>
+              </div>
+            </div>
+            <button class="btn-ia-reanalizar"
+                    [disabled]="reanalizando() || cargandoAnalisis()"
+                    (click)="reanalizar()"
+                    [title]="analisis() ? 'Volver a ejecutar el análisis con IA' : 'Analizar este reporte con IA'">
+              @if (reanalizando()) {
+                <span class="spinner-border spinner-border-sm me-1"></span>Analizando…
+              } @else if (analisis()) {
+                <i class="bi bi-arrow-clockwise me-1"></i>Reanalizar
+              } @else {
+                <i class="bi bi-stars me-1"></i>Analizar con IA
+              }
+            </button>
+          </div>
+
+          @if (cargandoAnalisis()) {
+            <div class="ia-estado">
+              <div class="spinner-border text-secondary" style="width:1.6rem;height:1.6rem"></div>
+              <span>Cargando análisis…</span>
+            </div>
+
+          } @else if (analisis(); as a) {
+
+            <!-- Veredicto -->
+            <div class="ia-veredicto" [class.ia-veredicto--sin-dano]="!a.tieneDano">
+              <div class="ia-veredicto-item">
+                <span class="ia-dato-label">Daño</span>
+                <span class="ia-dato-valor" [class.ia-si]="a.tieneDano" [class.ia-no]="!a.tieneDano">
+                  {{ a.tieneDano ? 'SÍ' : 'NO' }}
+                </span>
+              </div>
+              <div class="ia-veredicto-item">
+                <span class="ia-dato-label">Cantidad</span>
+                <span class="ia-dato-valor">{{ a.cantidadDanos }}</span>
+              </div>
+              <div class="ia-veredicto-item">
+                <span class="ia-dato-label">Severidad</span>
+                <span class="ia-badge-sev" [class]="claseSeveridad(a.severidad)">
+                  {{ a.severidadEtiqueta }}
+                </span>
+              </div>
+              <div class="ia-veredicto-item">
+                <span class="ia-dato-label">Confianza</span>
+                <span class="ia-dato-valor">
+                  @if (a.nivelConfianza !== null) {
+                    {{ a.nivelConfianza | number:'1.0-0' }}%
+                  } @else {
+                    —
+                  }
+                </span>
+              </div>
+            </div>
+
+            <!-- Tabla de deteriorateos -->
+            <div class="ia-tabla-wrap">
+              <table class="ia-tabla">
+                <thead>
+                  <tr>
+                    <th class="ia-col-tipo">Deterioro</th>
+                    <th class="ia-col-si">Detectado</th>
+                    <th class="ia-col-cant">Cantidad</th>
+                    <th class="ia-col-conf">Confianza</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (t of a.tiposDano; track t.codigo) {
+                    <tr [class.ia-fila-activa]="t.detectado">
+                      <td class="ia-col-tipo">{{ t.etiqueta }}</td>
+                      <td class="ia-col-si">
+                        <span class="ia-si-no" [class.ia-si]="t.detectado" [class.ia-no]="!t.detectado">
+                          {{ t.detectado ? 'SÍ' : 'NO' }}
+                        </span>
+                      </td>
+                      <td class="ia-col-cant">
+                        @if (t.detectado && t.cantidad > 0) {
+                          <span class="ia-cantidad">{{ t.cantidad }}</span>
+                        } @else {
+                          <span class="ia-vacio">—</span>
+                        }
+                      </td>
+                      <td class="ia-col-conf">
+                        @if (t.detectado && t.confianza !== null) {
+                          <span class="ia-conf">{{ t.confianza }}%</span>
+                        } @else {
+                          <span class="ia-vacio">—</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Reporte breve -->
+            @if (a.reporteBreve) {
+              <div class="ia-reporte">
+                <span class="ia-reporte-label">
+                  <i class="bi bi-file-text me-1"></i>Reporte breve
+                </span>
+                <p class="ia-reporte-texto">{{ a.reporteBreve }}</p>
+              </div>
+            }
+
+            <div class="ia-footer">
+              <span>
+                <i class="bi bi-cpu me-1"></i>{{ a.modeloIaUtilizado }}
+              </span>
+              <span>
+                <i class="bi bi-clock me-1"></i>
+                {{ a.fechaProcesamiento | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+            </div>
+
+          } @else {
+            <div class="ia-estado ia-estado--vacio">
+              <i class="bi bi-exclamation-circle"></i>
+              <span>Sin analizar. Pulsa “Analizar con IA” para clasificar este reporte.</span>
+            </div>
+          }
+        </section>
 
         <!-- Grid de metadatos -->
         <div class="detalle-meta-grid">
@@ -359,6 +490,27 @@
               <span class="meta-sub">{{ reporteVista()!.fechaCreacion | date:'HH:mm' }} hrs</span>
             </div>
           </div>
+
+          @if (coordenadaDetalle(); as c) {
+            <div class="meta-item">
+              <div class="meta-icon-wrap meta-icon-wrap--usuario">
+                <i class="bi bi-geo-alt-fill"></i>
+              </div>
+              <div class="meta-content">
+                <span class="meta-label">Coordenadas capturadas</span>
+                <span class="meta-valor">
+                  {{ c.latitud | number:'1.5-5' }}, {{ c.longitud | number:'1.5-5' }}
+                </span>
+                <span class="meta-sub">
+                  @if (c.precisionReportadaMetros !== null) {
+                    Precisión {{ c.precisionReportadaMetros | number:'1.0-1' }} m
+                  } @else {
+                    Precisión no disponible
+                  }
+                </span>
+              </div>
+            </div>
+          }
 
           <div class="meta-item">
             <div class="meta-icon-wrap meta-icon-wrap--usuario">
@@ -407,11 +559,11 @@
         <div class="confirm-icon">
           <i class="bi bi-trash3-fill"></i>
         </div>
-        <h3 class="confirm-titulo">Eliminar reporte</h3>
+        <h3 class="confirm-titulo">Anular reporte</h3>
         <p class="confirm-texto">
-          ¿Estás seguro de que querés eliminar el reporte
+          ¿Estás seguro de que querés anular el reporte
           <strong>#{{ reporteAEliminar()!.idReporte }}</strong>?
-          Esta acción no se puede deshacer.
+          Dejará de aparecer en la lista y en las estadísticas.
         </p>
         @if (reporteAEliminar()!.descripcion) {
           <span class="confirm-desc-chip">
@@ -425,9 +577,9 @@
         </button>
         <button class="btn-eliminar-confirm" [disabled]="eliminando()" (click)="ejecutarEliminar()">
           @if (eliminando()) {
-            <span class="spinner-border spinner-border-sm me-1"></span>Eliminando…
+            <span class="spinner-border spinner-border-sm me-1"></span>Anulando…
           } @else {
-            <i class="bi bi-trash3 me-1"></i>Sí, eliminar
+            <i class="bi bi-trash3 me-1"></i>Sí, anular
           }
         </button>
       </div>
@@ -454,8 +606,8 @@
 
         <!-- Columna izquierda: imagen + info -->
         <div class="editar-col-izq">
-          @if (reporteSeleccionado()!.imagenUrl) {
-            <img [src]="reporteSeleccionado()!.imagenUrl"
+          @if (srcImagen(reporteSeleccionado()); as srcEditar) {
+            <img [src]="srcEditar"
                  class="editar-hero-img"
                  alt="Foto reporte"
                  (error)="onImgError($event)" />
