@@ -238,9 +238,14 @@
 
                 @if (!buscandoVias && viasCercanas.length > 0) {
                   <p class="text-muted small mb-3">
-                    Selecciona la vía donde se encuentra el deterioro. Se encontraron {{ viasCercanas.length }} vía(s) cercana(s).
+                    <i class="fa-solid fa-map-location-dot me-2"></i>
+                    Haz clic en una vía del mapa o en la lista. Se encontraron {{ viasCercanas.length }} vía(s) cercana(s).
                   </p>
+
+                  <!-- MAPA INTERACTIVO -->
+                  <div id="mapa-vias-cercanas" class="border rounded-3 mb-3 shadow-sm" style="height: 350px;"></div>
                   
+                  <!-- LISTA DE VÍAS -->
                   <div class="list-group">
                     @for (via of viasCercanas; track via.idVia) {
                       <button
@@ -269,12 +274,12 @@
                   @if (viaSeleccionada) {
                     <div class="alert alert-success mt-3 mb-0">
                       <i class="fa-solid fa-circle-check me-2"></i>
-                      Vía seleccionada: <strong>{{ viaSeleccionada.nombreVia }}</strong>
+                      Vía seleccionada: <strong>{{ viaSeleccionada.nombreVia }}</strong> ({{ viaSeleccionada.codigoSegmento }})
                     </div>
                   } @else {
                     <div class="alert alert-info mt-3 mb-0">
-                      <i class="fa-solid fa-info-circle me-2"></i>
-                      Seleccionar una vía es opcional pero recomendado para mejorar la precisión.
+                      <i class="fa-solid fa-hand-pointer me-2"></i>
+                      Haz clic en una vía del mapa o la lista para seleccionarla.
                     </div>
                   }
                 }

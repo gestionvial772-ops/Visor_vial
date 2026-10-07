@@ -51,4 +51,9 @@ export class NuevoReporteService{
         
         return this.http.get<ViaCercana[]>(url, { params });
     }
+
+    obtenerViasGeoJson(): Observable<any> {
+        const url = `${environment.apiUrl}/admin/vias/geojson`;
+        return this.http.get(url);
+    }
 }
