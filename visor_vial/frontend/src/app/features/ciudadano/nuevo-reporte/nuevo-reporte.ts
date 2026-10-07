@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NuevoReporteService } from './nuevo-reporte.service';
+import { NuevoReporteService, ViaCercana } from './nuevo-reporte.service';
 import { CrearReporteRequest } from '../../../core/models/reporte.model';
 import { finalize } from 'rxjs';
 
@@ -38,6 +38,12 @@ export class NuevoReporte implements OnInit {
   mensajeExito = '';
   errorUbicacion = '';
 
+  // Nuevas propiedades para vías cercanas
+  viasCercanas: ViaCercana[] = [];
+  viaSeleccionada: ViaCercana | null = null;
+  buscandoVias = false;
+  errorVias = '';
+
   ngOnInit(): void {
     this.instanteInicioCaptura = new Date().toISOString();
     this.obtenerUbicacion();
@@ -63,6 +69,9 @@ export class NuevoReporte implements OnInit {
         this.obteniendoUbicacion = false;
         this.errorUbicacion = '';
 
+        // Buscar vías cercanas automáticamente
+        this.buscarViasCercanas();
+
         this.cdr.detectChanges();
       },
       (error) => {
@@ -80,6 +89,53 @@ export class NuevoReporte implements OnInit {
       },
     );
   }
+
+  buscarViasCercanas(): void {
+    if (this.latitud === null || this.longitud === null) {
+      return;
+    }
+
+    this.buscandoVias = true;
+    this.errorVias = '';
+    this.viasCercanas = [];
+    this.viaSeleccionada = null;
+
+    console.log('Buscando vías cercanas...');
+
+    this.nuevoReporteService
+      .obtenerViasCercanas(this.latitud, this.longitud)
+      .pipe(
+        finalize(() => {
+          this.buscandoVias = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (vias) => {
+          console.log('Vías cercanas encontradas:', vias);
+          this.viasCercanas = vias;
+          
+          // Si solo hay una vía, seleccionarla automáticamente
+          if (vias.length === 1) {
+            this.seleccionarVia(vias[0]);
+          }
+          
+          this.errorVias = '';
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error al buscar vías cercanas:', error);
+          this.errorVias = 'No se pudieron cargar las vías cercanas. Puedes continuar sin seleccionar una vía.';
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  seleccionarVia(via: ViaCercana): void {
+    this.viaSeleccionada = via;
+    console.log('Vía seleccionada:', via);
+  }
+
   seleccionarImagen(event: Event): void {
     const input = event.target as HTMLInputElement;
     const archivo = input.files?.[0];
@@ -126,7 +182,7 @@ export class NuevoReporte implements OnInit {
     }
 
     const request: CrearReporteRequest = {
-      idVia: null,
+      idVia: this.viaSeleccionada?.idVia ?? null,
       descripcion: this.formulario.value.descripcion ?? '',
       latitud: this.latitud,
       longitud: this.longitud,

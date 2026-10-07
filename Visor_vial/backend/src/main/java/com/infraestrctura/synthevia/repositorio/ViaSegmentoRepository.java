@@ -3,6 +3,7 @@ package com.infraestrctura.synthevia.repositorio;
 import com.infraestrctura.synthevia.entidad.ViaSegmento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -29,4 +30,43 @@ public interface ViaSegmentoRepository extends JpaRepository<ViaSegmento, Intege
         WHERE geom IS NOT NULL
     """, nativeQuery = true)
     String obtenerViasComoGeoJson();
+
+    /**
+     * Busca las vías más cercanas a un punto geográfico dado.
+     * Devuelve un array de objetos con: id_via, codigo_segmento, nombre_via, distancia_metros
+     * 
+     * @param longitud Longitud del punto de referencia (WGS84)
+     * @param latitud Latitud del punto de referencia (WGS84)
+     * @param radioMetros Radio de búsqueda en metros
+     * @param limite Número máximo de resultados
+     * @return Lista de objetos con información de vía y distancia, ordenadas por distancia
+     */
+    @Query(value = """
+        SELECT 
+            v.id_via,
+            v.codigo_segmento,
+            v.nombre_via,
+            ROUND(
+                ST_Distance(
+                    v.geom::geography,
+                    ST_SetSRID(ST_MakePoint(:longitud, :latitud), 4326)::geography
+                )::numeric,
+                2
+            ) as distancia_metros
+        FROM via_segmento v
+        WHERE v.geom IS NOT NULL
+          AND ST_DWithin(
+                v.geom::geography,
+                ST_SetSRID(ST_MakePoint(:longitud, :latitud), 4326)::geography,
+                :radioMetros
+              )
+        ORDER BY distancia_metros
+        LIMIT :limite
+    """, nativeQuery = true)
+    List<Object[]> findViasCercanasConDistancia(
+            @Param("longitud") Double longitud,
+            @Param("latitud") Double latitud,
+            @Param("radioMetros") Double radioMetros,
+            @Param("limite") Integer limite
+    );
 }

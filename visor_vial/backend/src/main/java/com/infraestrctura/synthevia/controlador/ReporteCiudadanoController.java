@@ -2,7 +2,9 @@ package com.infraestrctura.synthevia.controlador;
 
 import com.infraestrctura.synthevia.dto.CrearReporteDto;
 import com.infraestrctura.synthevia.dto.ReporteResumenDto;
+import com.infraestrctura.synthevia.dto.ViaCercanaDto;
 import com.infraestrctura.synthevia.entidad.Reporte;
+import com.infraestrctura.synthevia.repositorio.ViaSegmentoRepository;
 import com.infraestrctura.synthevia.servicio.ReporteService;
 
 import jakarta.validation.Valid;
@@ -16,6 +18,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/reportes")
 public class ReporteCiudadanoController {
@@ -24,10 +30,14 @@ public class ReporteCiudadanoController {
          ReporteCiudadanoController.class);
 
    private final ReporteService reporteService;
+   private final ViaSegmentoRepository viaRepository;
 
-   public ReporteCiudadanoController(ReporteService reporteService) {
+   public ReporteCiudadanoController(
+         ReporteService reporteService,
+         ViaSegmentoRepository viaRepository) {
 
       this.reporteService = reporteService;
+      this.viaRepository = viaRepository;
 
    }
 
@@ -52,6 +62,43 @@ public class ReporteCiudadanoController {
       return ResponseEntity
             .status(201)
             .body(toDto(reporte));
+   }
+
+   /**
+    * Obtiene las vías más cercanas a una coordenada geográfica.
+    * Útil para que el usuario seleccione manualmente la vía correcta al crear un reporte.
+    * 
+    * @param latitud Latitud del punto (WGS84, rango -90 a 90)
+    * @param longitud Longitud del punto (WGS84, rango -180 a 180)
+    * @param radio Radio de búsqueda en metros (por defecto 20m)
+    * @param limite Número máximo de resultados (por defecto 5)
+    * @return Lista de vías ordenadas por distancia (más cercana primero)
+    */
+   @GetMapping("/vias-cercanas")
+   public ResponseEntity<List<ViaCercanaDto>> obtenerViasCercanas(
+         @RequestParam Double latitud,
+         @RequestParam Double longitud,
+         @RequestParam(defaultValue = "20.0") Double radio,
+         @RequestParam(defaultValue = "5") Integer limite) {
+
+      log.info("Buscando vías cercanas a: lat={}, lon={}, radio={}m, limite={}", 
+               latitud, longitud, radio, limite);
+
+      List<Object[]> resultados = viaRepository.findViasCercanasConDistancia(
+            longitud, latitud, radio, limite);
+
+      List<ViaCercanaDto> viasCercanas = resultados.stream()
+            .map(row -> new ViaCercanaDto(
+                  (Integer) row[0],        // id_via
+                  (String) row[1],          // codigo_segmento
+                  (String) row[2],          // nombre_via
+                  (BigDecimal) row[3]       // distancia_metros
+            ))
+            .collect(Collectors.toList());
+
+      log.info("Se encontraron {} vías cercanas", viasCercanas.size());
+
+      return ResponseEntity.ok(viasCercanas);
    }
 
    private ReporteResumenDto toDto(
