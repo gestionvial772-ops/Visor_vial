@@ -17,6 +17,20 @@
           {{ mensajeExito }}
         </div>
       </div>
+
+      @if (reporteEnviado) {
+        <div class="text-center my-4">
+          <button
+            type="button"
+            class="btn btn-lg text-white rounded-pill px-5 py-3"
+            style="background-color: #43887b"
+            (click)="reiniciarFormulario()"
+          >
+            <i class="fa-solid fa-plus me-2"></i>
+            Crear nuevo reporte
+          </button>
+        </div>
+      }
     }
     @if (mensajeError) {
       <div class="alert alert-danger d-flex align-items-center shadow-sm" role="alert">
@@ -30,6 +44,7 @@
     <div
       class="card border-0 shadow-lg rounded-4 overflow-hidden mx-auto"
       style="max-width: 1100px"
+      [hidden]="reporteEnviado"
     >
       <div class="row g-0">
         <div class="col-lg-5 p-4 d-flex flex-column" style="background-color: #f5faf8">

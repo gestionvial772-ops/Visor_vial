@@ -36,6 +36,7 @@ export class NuevoReporte implements OnInit, AfterViewInit, OnDestroy {
 
   obteniendoUbicacion = false;
   enviando = false;
+  reporteEnviado = false; // Nueva bandera
 
   mensajeError = '';
   mensajeExito = '';
@@ -356,6 +357,7 @@ export class NuevoReporte implements OnInit, AfterViewInit, OnDestroy {
           this.mensajeExito =
             'Reporte registrado. El personal municipal lo revisará.';
           this.mensajeError = '';
+          this.reporteEnviado = true; // Marcar como enviado
           this.cdr.detectChanges();
         },
 
@@ -368,6 +370,36 @@ export class NuevoReporte implements OnInit, AfterViewInit, OnDestroy {
           this.cdr.detectChanges();
         },
       });
+  }
+
+  reiniciarFormulario(): void {
+    // Limpiar formulario
+    this.formulario.reset();
+    this.archivoSeleccionado = null;
+    this.imagenPrevisualizacion = null;
+
+    // Limpiar mensajes
+    this.mensajeExito = '';
+    this.mensajeError = '';
+    this.reporteEnviado = false;
+
+    // Limpiar vías
+    this.viasCercanas = [];
+    this.viaSeleccionada = null;
+
+    // Destruir mapa si existe
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
+
+    // Reiniciar timestamp
+    this.instanteInicioCaptura = new Date().toISOString();
+
+    // Obtener nueva ubicación
+    this.obtenerUbicacion();
+
+    this.cdr.detectChanges();
   }
 
   private obtenerMensajeErrorUbicacion(error: GeolocationPositionError): string {
