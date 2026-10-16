@@ -38,12 +38,12 @@ public class SupabaseStorageService {
             @Value("${supabase.secret-key}") String secretKey,
             @Value("${supabase.storage.bucket}") String bucket) {
 
-        this.restClient = restClientBuilder
+        this.restClient = restClientBuilder.clone()
                 .baseUrl(supabaseUrl + "/storage/v1")
                 .defaultHeader("apikey", secretKey)
                 .build();
 
-        this.restClientExterno = restClientBuilder
+        this.restClientExterno = restClientBuilder.clone()
                 .requestFactory(GeminiDanoService.crearFactory(30, 10))
                 .build();
 

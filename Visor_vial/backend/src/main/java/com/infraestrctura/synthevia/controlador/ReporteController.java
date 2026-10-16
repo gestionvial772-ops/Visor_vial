@@ -109,9 +109,9 @@ public class ReporteController {
     }
 
     @PostMapping
-    public ResponseEntity<ReporteResumenDto> crear(@RequestBody Reporte body) {
+    public ResponseEntity<ReporteResumenDto> crear(@RequestBody Reporte body, java.security.Principal principal) {
 
-        Reporte saved = reporteService.crear(body);
+        Reporte saved = reporteService.crear(body, Integer.valueOf(principal.getName()));
 
         log.info(
                 "Reporte creado #{}",
@@ -155,6 +155,6 @@ public class ReporteController {
                 r.getImagenUrl(),
                 r.getDescripcion(),
                 r.getEstado(),
-                r.getFechaCreacion());
+                r.getFechaCreacion(), r.getNombreVia(), r.getCodigoSegmento());
     }
 }

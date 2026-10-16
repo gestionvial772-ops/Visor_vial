@@ -9,5 +9,7 @@ public record ReporteResumenDto(
     String  imagenUrl,
     String  descripcion,
     String  estado,
-    OffsetDateTime fechaCreacion
+    OffsetDateTime fechaCreacion,
+    String nombreVia,
+    String codigoSegmento
 ) {}

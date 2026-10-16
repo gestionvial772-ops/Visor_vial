@@ -5,6 +5,8 @@ export interface Reporte{
     idReporte: number,
     idUsuario: number,
     idVia: number | null,
+    nombreVia?: string | null;
+    codigoSegmento?: string | null;
     reporteOriginalId: number | null,
     imagenUrl: string,
     descripcion: string | null,

@@ -18,6 +18,13 @@ public class Reporte {
     @Column(name = "id_via")
     private Integer idVia;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_via", insertable = false, updatable = false)
+    private ViaSegmento via;
+
+    public String getNombreVia() { return via == null ? null : via.getNombreVia(); }
+    public String getCodigoSegmento() { return via == null ? null : via.getCodigoSegmento(); }
+
     @Column(name = "imagen_url", nullable = false)
     private String imagenUrl;
 

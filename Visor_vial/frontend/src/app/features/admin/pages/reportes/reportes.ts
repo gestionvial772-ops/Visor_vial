@@ -34,6 +34,7 @@ export class Reportes implements OnInit {
   paginaActual   = signal(0);
   cargando       = signal(false);
   errorCarga     = signal(false);
+  mensajeErrorCarga = signal('');
 
   // Filtros
   filtroEstado    = '';
@@ -140,9 +141,15 @@ export class Reportes implements OnInit {
         this.cargando.set(false);
         p.contenido.forEach((r) => this.resolverImagen(r.idReporte));
       },
-      error: () => {
+      error: (error) => {
         this.cargando.set(false);
         this.errorCarga.set(true);
+        this.mensajeErrorCarga.set(
+          error.status === 401 ? 'Tu sesión venció. Vuelve a iniciar sesión.' :
+          error.status === 403 ? 'Tu cuenta no tiene permiso para consultar todos los reportes. Se requiere el rol ADMIN.' :
+          error.status === 0 ? 'No se pudo conectar con el servidor. Comprueba que el backend esté encendido.' :
+          'El servidor no pudo cargar los reportes. Intenta nuevamente.'
+        );
       },
     });
   }

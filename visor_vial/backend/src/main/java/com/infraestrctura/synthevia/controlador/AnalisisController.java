@@ -72,6 +72,8 @@ public class AnalisisController {
     @GetMapping("/{id}/analisis")
     public ResponseEntity<AnalisisIaDto> analisis(@PathVariable Integer id) {
 
+        if (reporteService.obtener(id).isEmpty()) return ResponseEntity.notFound().build();
+
         return analisisDanoService.obtenerAnalisis(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
@@ -144,7 +146,7 @@ public class AnalisisController {
                 r.getImagenUrl(),
                 r.getDescripcion(),
                 r.getEstado(),
-                r.getFechaCreacion());
+                r.getFechaCreacion(), r.getNombreVia(), r.getCodigoSegmento());
     }
 
     private CoordenadaDto toCoordenadaDto(Coordenada c) {

@@ -21,6 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.security.Principal;
+import java.util.Map;
+import com.infraestrctura.synthevia.dto.PaginaDto;
+import com.infraestrctura.synthevia.servicio.SupabaseStorageService;
 
 @RestController
 @RequestMapping("/reportes")
@@ -31,14 +35,35 @@ public class ReporteCiudadanoController {
 
    private final ReporteService reporteService;
    private final ViaSegmentoRepository viaRepository;
+   private final SupabaseStorageService storage;
 
    public ReporteCiudadanoController(
          ReporteService reporteService,
-         ViaSegmentoRepository viaRepository) {
+         ViaSegmentoRepository viaRepository, SupabaseStorageService storage) {
 
       this.reporteService = reporteService;
       this.viaRepository = viaRepository;
+      this.storage = storage;
 
+   }
+
+   @GetMapping("/mios")
+   public PaginaDto<ReporteResumenDto> propios(Principal principal,
+         @RequestParam(defaultValue = "0") int pagina,
+         @RequestParam(defaultValue = "10") int tamanio) {
+      var resultados = reporteService.listarPropios(Integer.valueOf(principal.getName()), pagina, tamanio)
+            .map(this::toDto);
+      return new PaginaDto<>(resultados.getContent(), resultados.getNumber(),
+            resultados.getTotalPages(), resultados.getTotalElements());
+   }
+
+   @GetMapping("/{id}/imagen")
+   public ResponseEntity<Map<String, String>> imagenPropia(@PathVariable Integer id, Principal principal) {
+      var reporte = reporteService.obtener(id)
+            .filter(r -> r.getIdUsuario().equals(Integer.valueOf(principal.getName())));
+      if (reporte.isEmpty()) return ResponseEntity.notFound().build();
+      String url = storage.urlPublica(reporte.get().getImagenUrl());
+      return url == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(Map.of("url", url));
    }
 
    @PostMapping
@@ -48,10 +73,10 @@ public class ReporteCiudadanoController {
       CrearReporteDto dto,
 
       @RequestPart 
-      MultipartFile imagen
+      MultipartFile imagen, java.security.Principal principal
    ) 
    {   
-      Reporte reporte = reporteService.crearDesdeSistema(dto, imagen);
+      Reporte reporte = reporteService.crearDesdeSistema(dto, imagen, Integer.valueOf(principal.getName()));
 
       log.info("Reporte ciudadano creado: #{}", reporte.getIdReporte());
 
@@ -111,7 +136,7 @@ public class ReporteCiudadanoController {
             reporte.getImagenUrl(),
             reporte.getDescripcion(),
             reporte.getEstado(),
-            reporte.getFechaCreacion());
+            reporte.getFechaCreacion(), reporte.getNombreVia(), reporte.getCodigoSegmento());
    }
 
 }

@@ -31,7 +31,7 @@
         <i class="bi bi-search input-icon"></i>
         <input class="filtro-input"
                type="text"
-               placeholder="Descripción, ID de vía…"
+               placeholder="ID de reporte, vía, código o descripción…"
                [(ngModel)]="filtroBusqueda"
                (keyup.enter)="aplicarFiltro()" />
       </div>
@@ -151,7 +151,7 @@
   } @else if (errorCarga()) {
     <div class="estado-tabla estado-error">
       <i class="bi bi-wifi-off fs-2"></i>
-      <span>No se pudo conectar con el servidor.</span>
+      <span>{{ mensajeErrorCarga() }}</span>
       <button class="btn-retry" (click)="cargarReportes(0)">
         <i class="bi bi-arrow-clockwise me-1"></i>Reintentar
       </button>
@@ -208,7 +208,7 @@
                 @if (r.idVia) {
                   <span class="geo-chip">
                     <i class="bi bi-signpost-2-fill"></i>
-                    Vía #{{ r.idVia }}
+                    {{ r.nombreVia || 'Vía sin nombre' }}{{ r.codigoSegmento ? ' — ' + r.codigoSegmento : '' }}
                   </span>
                 } @else {
                   <span class="text-muted small fst-italic">Sin vía</span>
@@ -472,7 +472,7 @@
               <span class="meta-label">Vía asignada</span>
               @if (reporteVista()!.idVia) {
                 <span class="meta-valor">
-                  <span class="geo-chip geo-chip--sm">Vía #{{ reporteVista()!.idVia }}</span>
+                  <span class="geo-chip geo-chip--sm">{{ reporteVista()!.nombreVia || 'Vía sin nombre' }}{{ reporteVista()!.codigoSegmento ? ' — ' + reporteVista()!.codigoSegmento : '' }}</span>
                 </span>
               } @else {
                 <span class="meta-valor meta-valor--muted">Sin vía asignada</span>
@@ -622,7 +622,7 @@
             </span>
             @if (reporteSeleccionado()!.idVia) {
               <span class="editar-meta-chip">
-                <i class="bi bi-signpost-2-fill"></i>Vía #{{ reporteSeleccionado()!.idVia }}
+                <i class="bi bi-signpost-2-fill"></i>{{ reporteSeleccionado()!.nombreVia || 'Vía sin nombre' }}{{ reporteSeleccionado()!.codigoSegmento ? ' — ' + reporteSeleccionado()!.codigoSegmento : '' }}
               </span>
             }
             <span class="editar-meta-chip">

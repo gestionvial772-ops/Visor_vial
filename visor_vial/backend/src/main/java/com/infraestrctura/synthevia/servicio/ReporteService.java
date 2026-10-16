@@ -14,6 +14,11 @@ import java.util.Optional;
 import org.springframework.web.multipart.MultipartFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.infraestrctura.synthevia.repositorio.ViaSegmentoRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 
@@ -24,17 +29,19 @@ public class ReporteService {
     private final CoordenadaService coordenadaService;
     private final RegistroTiempoService registroTiempoService;
     private final SupabaseStorageService supabaseStorageService;
+    private final ViaSegmentoRepository viaRepository;
     private static final Logger log = LoggerFactory.getLogger(ReporteService.class);
 
     public ReporteService(
             ReporteRepository reporteRepository,
             CoordenadaService coordenadaService,
             RegistroTiempoService registroTiempoService,
-            SupabaseStorageService supabaseStorageService) {
+            SupabaseStorageService supabaseStorageService, ViaSegmentoRepository viaRepository) {
         this.reporteRepository = reporteRepository;
         this.coordenadaService = coordenadaService;
         this.registroTiempoService = registroTiempoService;
         this.supabaseStorageService = supabaseStorageService;
+        this.viaRepository = viaRepository;
     }
 
     public Page<Reporte> listar(
@@ -42,11 +49,11 @@ public class ReporteService {
             int tamanio,
             String estado,
             String busqueda) {
-        Pageable pageable = PageRequest.of(pagina, tamanio);
+        Pageable pageable = paginacion(pagina, tamanio);
 
         return reporteRepository.buscar(
-                estado,
-                busqueda,
+                estado == null || estado.isBlank() ? null : estado.trim(),
+                busqueda == null ? null : busqueda.trim(),
                 pageable);
     }
 
@@ -59,14 +66,14 @@ public class ReporteService {
     }
 
     public Optional<Reporte> obtener(Integer id) {
-        return reporteRepository.findById(id);
+        return reporteRepository.findById(id).filter(r -> !r.estaAnulado());
     }
 
     @Transactional
     public Optional<Reporte> actualizarEstado(
             Integer id,
             String nuevoEstado) {
-        Optional<Reporte> reporteOpt = reporteRepository.findById(id);
+        Optional<Reporte> reporteOpt = obtener(id);
         if (reporteOpt.isEmpty()) {
             return Optional.empty();
         }
@@ -81,14 +88,12 @@ public class ReporteService {
     }
 
     @Transactional
-    public Reporte crear(Reporte body) {
+    public Reporte crear(Reporte body, Integer idUsuario) {
+        validarVia(body.getIdVia());
 
         Reporte reporte = new Reporte();
 
-        reporte.setIdUsuario(
-                body.getIdUsuario() != null
-                        ? body.getIdUsuario()
-                        : 1);
+        reporte.setIdUsuario(idUsuario);
 
         reporte.setIdVia(body.getIdVia());
 
@@ -136,72 +141,70 @@ public class ReporteService {
     }
 
     @Transactional
-    public Reporte crearDesdeSistema(CrearReporteDto dto, MultipartFile imagen) {
+    public Reporte crearDesdeSistema(CrearReporteDto dto, MultipartFile imagen, Integer idUsuario) {
+        validarVia(dto.idVia());
 
         OffsetDateTime instanteServidor = OffsetDateTime.now();
 
         String imagenPath = supabaseStorageService.generarRuta(imagen);
 
-        boolean imagenSubida = false;
-
-        try {
-
-            Reporte reporte = new Reporte();
-
-            reporte.setIdUsuario(1);
-
-            reporte.setIdVia(dto.idVia());
-
-            reporte.setImagenUrl(imagenPath);
-
-            reporte.setDescripcion(dto.descripcion());
-
-            reporte.setEstado("PENDIENTE");
-
-            Reporte guardado = reporteRepository.save(reporte);
-            log.info(
-                    "PASO 1 - Reporte guardado. idReporte={}",
-                    guardado.getIdReporte());
-
-            registroTiempoService.registrarInicioCaptura(guardado.getIdReporte(), dto.instanteInicioCaptura());
-            log.info(
-                    "PASO 2 - INICIO_CAPTURA registrado. idReporte={}",
-                    guardado.getIdReporte());
-
-            registroTiempoService.registrarEnvioServidor(guardado.getIdReporte(), instanteServidor);
-            log.info(
-                    "PASO 3 - ENVIO_SERVIDOR registrado. idReporte={}",
-                    guardado.getIdReporte());
-
-            log.info(
-                    "PASO 4 - Antes de guardar coordenada. idReporte={}",
-                    guardado.getIdReporte());
-            coordenadaService.guardar(
-                    guardado.getIdReporte(),
-                    dto.latitud(),
-                    dto.longitud(),
-                    dto.precisionReportadaMetros());
-
-            log.info(
-                    "PASO 5 - Coordenada guardada. idReporte={}",
-                    guardado.getIdReporte());
-
-            registroTiempoService.registrarGeoprocesamiento(guardado.getIdReporte());
-
-            supabaseStorageService.subir(imagenPath, imagen);
-
-            imagenSubida = true;
-
-            registroTiempoService.registrarConsolidacion(guardado.getIdReporte());
-
-            return guardado;
-
-        } catch (RuntimeException e) {
-            if (imagenSubida) {
-                supabaseStorageService.eliminarSilenciosamente(imagenPath);
+        // Compensa fallos incluso cuando el commit ocurre al salir del servicio.
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if (status == STATUS_ROLLED_BACK) supabaseStorageService.eliminarSilenciosamente(imagenPath);
             }
-            throw e;
-        }
+        });
+
+
+        Reporte reporte = new Reporte();
+
+        reporte.setIdUsuario(idUsuario);
+
+        reporte.setIdVia(dto.idVia());
+
+        reporte.setImagenUrl(imagenPath);
+
+        reporte.setDescripcion(dto.descripcion());
+
+        reporte.setEstado("PENDIENTE");
+
+        Reporte guardado = reporteRepository.save(reporte);
+        log.info(
+                "PASO 1 - Reporte guardado. idReporte={}",
+                guardado.getIdReporte());
+
+        registroTiempoService.registrarInicioCaptura(guardado.getIdReporte(), dto.instanteInicioCaptura());
+        log.info(
+                "PASO 2 - INICIO_CAPTURA registrado. idReporte={}",
+                guardado.getIdReporte());
+
+        registroTiempoService.registrarEnvioServidor(guardado.getIdReporte(), instanteServidor);
+        log.info(
+                "PASO 3 - ENVIO_SERVIDOR registrado. idReporte={}",
+                guardado.getIdReporte());
+
+        log.info(
+                "PASO 4 - Antes de guardar coordenada. idReporte={}",
+                guardado.getIdReporte());
+        coordenadaService.guardar(
+                guardado.getIdReporte(),
+                dto.latitud(),
+                dto.longitud(),
+                dto.precisionReportadaMetros());
+
+        log.info(
+                "PASO 5 - Coordenada guardada. idReporte={}",
+                guardado.getIdReporte());
+
+        registroTiempoService.registrarGeoprocesamiento(guardado.getIdReporte());
+
+        supabaseStorageService.subir(imagenPath, imagen);
+
+        registroTiempoService.registrarConsolidacion(guardado.getIdReporte());
+
+        return guardado;
+
     }
 
     /**
@@ -210,6 +213,24 @@ public class ReporteService {
      * usuario abandona el formulario. El analisis queda a cargo del
      * administrador mediante el boton Reanalizar del panel.
      */
+
+    public Page<Reporte> listarPropios(Integer idUsuario, int pagina, int tamanio) {
+        return reporteRepository.findByIdUsuarioAndEliminadoEnIsNullOrderByFechaCreacionDesc(
+                idUsuario, paginacion(pagina, tamanio));
+    }
+
+    private Pageable paginacion(int pagina, int tamanio) {
+        if (pagina < 0 || tamanio < 1 || tamanio > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paginacion invalida (tamanio: 1 a 100).");
+        }
+        return PageRequest.of(pagina, tamanio);
+    }
+
+    private void validarVia(Integer idVia) {
+        if (idVia != null && !viaRepository.existsById(idVia)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La via seleccionada no existe.");
+        }
+    }
 
     public EstadisticasDto obtenerEstadisticas() {
 

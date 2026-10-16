@@ -15,6 +15,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CsrfToken;
 
 @RestController
 @RequestMapping("/public")
@@ -24,14 +32,24 @@ public class AutenticacionController {
 
     private final UsuarioService usuarioService;
     private final CaptchaService captchaService;
+    private final SecurityContextRepository securityContextRepository;
 
-    public AutenticacionController(UsuarioService usuarioService, CaptchaService captchaService) {
+    public AutenticacionController(UsuarioService usuarioService, CaptchaService captchaService,
+            SecurityContextRepository securityContextRepository) {
         this.usuarioService = usuarioService;
         this.captchaService = captchaService;
+        this.securityContextRepository = securityContextRepository;
+    }
+
+    @GetMapping("/csrf")
+    public CsrfToken csrf(CsrfToken token, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store");
+        return token;
     }
 
     @PostMapping("/iniciar-sesion")
-    public ResponseEntity<RespuestaInicioSesion> iniciarSesion(@Valid @RequestBody SolicitudInicioSesion solicitud) {
+    public ResponseEntity<RespuestaInicioSesion> iniciarSesion(@Valid @RequestBody SolicitudInicioSesion solicitud,
+            HttpServletRequest request, HttpServletResponse response) {
         log.info("Intento de inicio de sesión para DNI: {}", solicitud.dni());
 
         if (!captchaService.validar(solicitud.captchaToken())) {
@@ -59,6 +77,16 @@ public class AutenticacionController {
         }
 
         Usuario u = usuario.get();
+
+        // Reemplazar la sesion anterior evita fijacion de sesion y rota el CSRF.
+        var anterior = request.getSession(false);
+        if (anterior != null) anterior.invalidate();
+        var context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(UsernamePasswordAuthenticationToken.authenticated(
+                u.getIdUsuario().toString(), null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + u.getRol()))));
+        SecurityContextHolder.setContext(context);
+        securityContextRepository.saveContext(context, request, response);
 
         log.info("Inicio de sesión exitoso - Usuario: {}, Rol: {}", u.getNombre(), u.getRol());
 

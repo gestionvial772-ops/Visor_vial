@@ -1,0 +1,151 @@
+// Modal Overlay
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.modal-contenedor {
+  background: white;
+  border-radius: 24px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header-custom {
+  padding: 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.modal-eyebrow {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #43887b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.modal-titulo {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a3e38;
+  margin: 0;
+}
+
+.modal-cerrar {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #64748b;
+  font-size: 1.25rem;
+
+  &:hover {
+    background: #e2e8f0;
+    color: #1a3e38;
+  }
+}
+
+.modal-body-custom {
+  padding: 2rem;
+}
+
+.modal-footer-custom {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.detalle-seccion {
+  margin-bottom: 1.5rem;
+}
+
+.detalle-titulo {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1a3e38;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+// Análisis de IA
+.analisis-container {
+  background: #f8fafc;
+  padding: 1.25rem;
+  border-radius: 12px;
+}
+
+.tipos-dano {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tipo-dano-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+// Severidad
+.severidad-1 {
+  background-color: #22c55e !important;
+  color: white;
+}
+
+.severidad-2 {
+  background-color: #fbbf24 !important;
+  color: #1a3e38;
+}
+
+.severidad-3 {
+  background-color: #ef4444 !important;
+  color: white;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .modal-contenedor {
+    border-radius: 16px;
+  }
+
+  .modal-header-custom {
+    padding: 1.5rem;
+  }
+
+  .modal-body-custom {
+    padding: 1.5rem;
+  }
+
+  .modal-titulo {
+    font-size: 1.5rem;
+  }
+}

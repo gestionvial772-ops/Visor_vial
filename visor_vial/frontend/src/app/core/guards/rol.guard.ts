@@ -28,5 +28,5 @@ export const rolGuard: CanActivateFn = (route) => {
     return router.createUrlTree(['/admin/dashboard']);
   }
 
-  return router.createUrlTree(['/ciudadano/nuevo-reporte']);
+  return router.createUrlTree(['/ciudadano/mis-reportes']);
 };
