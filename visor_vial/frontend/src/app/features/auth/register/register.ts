@@ -78,7 +78,7 @@ export class Register {
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
 
-      this.toast.mostrar('Revisa los campos del formulario antes de continuar.', false);
+      this.toast.mostrar('Revisa los campos del formulario antes de continuar.', false, 'Revisa el formulario');
 
       return;
     }
@@ -86,7 +86,7 @@ export class Register {
     const captchaToken = this.formulario.value.captcha;
 
     if (!captchaToken) {
-      this.toast.mostrar('Debes completar el CAPTCHA.', false);
+      this.toast.mostrar('Debes completar el CAPTCHA.', false, 'Falta el CAPTCHA');
 
       return;
     }
@@ -113,7 +113,7 @@ export class Register {
 
       .subscribe({
         next: (respuesta) => {
-          this.toast.mostrar(respuesta.mensaje, true);
+          this.toast.mostrar(respuesta.mensaje, true, 'Cuenta creada');
 
           this.router.navigate(['/auth/login']);
         },
@@ -121,7 +121,7 @@ export class Register {
         error: (error) => {
           console.error('Error registrando usuario:', error);
           const mensaje = error?.error?.mensaje ?? 'No fue posible crear la cuenta.';
-          this.toast.mostrar(mensaje, false);
+          this.toast.mostrar(mensaje, false, 'No se pudo crear la cuenta');
         },
       });
   }

@@ -1,6 +1,322 @@
-<div class="proxima-entrega">
-  <div class="icon-wrap"><i class="bi bi-people"></i></div>
-  <h2>Gestión de Usuarios</h2>
-  <p>Este módulo estará disponible en la siguiente iteración del proyecto.</p>
-  <span class="badge-proximo">Próximamente</span>
+<!-- ══ CABECERA ══════════════════════════════════════════════════════════ -->
+<div class="page-header-card">
+  <div class="page-header-icon">
+    <i class="bi bi-people-fill"></i>
+  </div>
+  <div class="page-header-text">
+    <h1 class="page-title">Usuarios</h1>
+    <p class="page-subtitle">Cuentas registradas en el sistema y su rol de acceso.</p>
+  </div>
 </div>
+
+<!-- ══ RESUMEN + FILTROS ══════════════════════════════════════════════════ -->
+<div class="resumen-card">
+  <div class="resumen-metricas">
+    <div class="metrica">
+      <span class="metrica-valor">{{ estadisticas()?.total ?? '—' }}</span>
+      <span class="metrica-label">Cuentas</span>
+    </div>
+    <div class="metrica">
+      <span class="metrica-valor">{{ estadisticas()?.ciudadanos ?? '—' }}</span>
+      <span class="metrica-label">Ciudadanos</span>
+    </div>
+    <div class="metrica">
+      <span class="metrica-valor">{{ estadisticas()?.administradores ?? '—' }}</span>
+      <span class="metrica-label">Administradores</span>
+    </div>
+    <div class="metrica">
+      <span class="metrica-valor">{{ estadisticas()?.activosHoy ?? '—' }}</span>
+      <span class="metrica-label">Reportaron hoy</span>
+    </div>
+  </div>
+
+  <div class="filtros">
+    <div class="filtro">
+      <label class="filtro-label">Rol</label>
+      <select class="filtro-select" [(ngModel)]="filtroRol" (change)="aplicarFiltro()">
+        @for (op of rolesOpciones; track op.valor) {
+          <option [value]="op.valor">{{ op.etiqueta }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filtro filtro--buscar">
+      <label class="filtro-label">Buscar</label>
+      <input
+        class="filtro-input"
+        type="text"
+        placeholder="Nombre, apellido, correo o DNI…"
+        [(ngModel)]="filtroBusqueda"
+        (keyup.enter)="aplicarFiltro()" />
+    </div>
+
+    <button class="btn-limpiar" (click)="limpiarFiltros()" title="Limpiar filtros">
+      <i class="bi bi-x-circle"></i>
+    </button>
+    <button class="btn-filtrar" (click)="aplicarFiltro()">
+      <i class="bi bi-funnel"></i>Filtrar
+    </button>
+  </div>
+</div>
+
+<!-- ══ TABLA ════════════════════════════════════════════════════════════ -->
+<div class="tabla-card">
+
+  <div class="tabla-toolbar">
+    <div class="toolbar-left">
+      <span class="tabla-titulo">Listado de cuentas</span>
+      @if (totalElementos() > 0) {
+        <span class="total-badge">{{ totalElementos() }}</span>
+      }
+    </div>
+    <div class="toolbar-right">
+      <button class="btn-export" (click)="exportarCsv()">
+        <i class="bi bi-download me-1"></i>Exportar CSV
+      </button>
+      <button class="btn-refresh" (click)="cargarUsuarios(paginaActual())" title="Recargar">
+        <i class="bi bi-arrow-clockwise"></i>
+      </button>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="estado-tabla">
+      <div class="spinner-border text-secondary" style="width:2rem;height:2rem"></div>
+      <span>Cargando usuarios…</span>
+    </div>
+
+  } @else if (errorCarga()) {
+    <div class="estado-tabla estado-error">
+      <i class="bi bi-wifi-off fs-2"></i>
+      <span>{{ mensajeErrorCarga() }}</span>
+      <button class="btn-retry" (click)="cargarUsuarios(0)">
+        <i class="bi bi-arrow-clockwise me-1"></i>Reintentar
+      </button>
+    </div>
+
+  } @else if (usuarios().length === 0) {
+    <div class="estado-tabla estado-vacio">
+      <i class="bi bi-inbox fs-2 text-muted"></i>
+      <span>No se encontraron cuentas con los filtros aplicados.</span>
+    </div>
+
+  } @else {
+    <div class="tabla-wrapper">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Cuenta</th>
+            <th>DNI</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Reportes</th>
+            <th>Registro</th>
+            <th class="col-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of usuarios(); track u.idUsuario) {
+            <tr>
+              <td class="col-cuenta">
+                <div class="cuenta">
+                  <span class="avatar">{{ iniciales(u) }}</span>
+                  <span class="cuenta-nombre">{{ nombreCompleto(u) }}</span>
+                </div>
+              </td>
+                <td class="col-dni">
+                  <span class="id-chip">{{ u.dni }}</span>
+                </td>
+                <td class="col-correo">
+                  <span class="correo-texto">{{ u.correoElectronico }}</span>
+                </td>
+                <td class="col-rol">
+                  <span class="badge-rol badge-{{ u.rol | lowercase }}">
+                    <span class="badge-dot"></span>{{ etiquetaRol(u.rol) }}
+                  </span>
+                </td>
+                <td class="col-reportes">
+                  @if (u.totalReportes > 0) {
+                    <span class="contador">{{ u.totalReportes }}</span>
+                  } @else {
+                    <span class="sin-datos">—</span>
+                  }
+                </td>
+                <td class="col-registro">
+                  <span class="fecha-main">{{ u.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+                  <span class="fecha-hora">{{ u.fechaCreacion | date:'HH:mm' }}</span>
+                </td>
+                <td class="col-acciones">
+                  <div class="acciones-wrap">
+                    <button class="btn-accion btn-editar" (click)="abrirEdicion(u)">
+                      <i class="bi bi-pencil"></i> Editar
+                    </button>
+                    <button class="btn-accion btn-rol" (click)="abrirCambioRol(u)">
+                      <i class="bi bi-arrow-left-right"></i> Rol
+                    </button>
+                  </div>
+                </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tabla-footer">
+      <span class="tabla-info">
+        Mostrando {{ paginaActual() * tamanio + 1 }} a
+        {{ [((paginaActual() + 1) * tamanio), totalElementos()] | min }} de
+        {{ totalElementos() }} cuentas
+      </span>
+
+      @if (totalPaginas() > 1) {
+        <div class="paginacion">
+          <button class="pag-btn" [disabled]="paginaActual() === 0"
+                  (click)="irAPagina(0)" title="Primera">
+            <i class="bi bi-chevron-double-left"></i>
+          </button>
+          <button class="pag-btn" [disabled]="paginaActual() === 0"
+                  (click)="irAPagina(paginaActual() - 1)">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          @for (p of paginasVisibles(); track p) {
+            <button class="pag-btn" [class.activo]="p === paginaActual()" (click)="irAPagina(p)">
+              {{ p + 1 }}
+            </button>
+          }
+          <button class="pag-btn" [disabled]="paginaActual() === totalPaginas() - 1"
+                  (click)="irAPagina(paginaActual() + 1)">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+          <button class="pag-btn" [disabled]="paginaActual() === totalPaginas() - 1"
+                  (click)="irAPagina(totalPaginas() - 1)" title="Última">
+            <i class="bi bi-chevron-double-right"></i>
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- ══ EDICIÓN DE CUENTA ══════════════════════════════════════════════════ -->
+@if (editando(); as u) {
+  <div class="modal-backdrop-custom" (click)="cancelarEdicion()">
+    <div class="modal-panel modal-panel--ancho" (click)="$event.stopPropagation()">
+      <div class="modal-cabecera">
+        <h3 class="modal-titulo">Editar cuenta</h3>
+        <button class="modal-cerrar" (click)="cancelarEdicion()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-cuerpo">
+        <div class="modal-identidad">
+          <span class="avatar">{{ iniciales(u) }}</span>
+          <div class="modal-identidad-texto">
+            <span class="modal-identidad-nombre">{{ nombreCompleto(u) }}</span>
+            <span class="modal-identidad-dni">DNI {{ u.dni }}</span>
+          </div>
+          <span class="badge-rol badge-{{ u.rol | lowercase }}">
+            <span class="badge-dot"></span>{{ etiquetaRol(u.rol) }}
+          </span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-fila">
+            <label class="form-label" for="edit-nombre">Nombre</label>
+            <input id="edit-nombre" class="form-campo" type="text" maxlength="100"
+                   [(ngModel)]="borradorNombre" [disabled]="guardando()" />
+          </div>
+
+          <div class="form-fila">
+            <label class="form-label" for="edit-apellidos">Apellidos</label>
+            <input id="edit-apellidos" class="form-campo" type="text" maxlength="100"
+                   [(ngModel)]="borradorApellidos" [disabled]="guardando()" />
+          </div>
+        </div>
+
+        <div class="form-fila">
+          <label class="form-label" for="edit-correo">Correo electrónico</label>
+          <input id="edit-correo" class="form-campo" type="email"
+                 [(ngModel)]="borradorCorreo" [disabled]="guardando()" />
+        </div>
+
+        <p class="form-nota">El DNI y la contraseña no se modifican desde aquí.</p>
+
+        @if (errorFormulario()) {
+          <p class="form-error">{{ errorFormulario() }}</p>
+        }
+      </div>
+
+      <div class="modal-pie">
+        <button class="btn-cancelar-modal" (click)="cancelarEdicion()" [disabled]="guardando()">
+          Cancelar
+        </button>
+        <button class="btn-confirmar" (click)="guardarEdicion()" [disabled]="guardando()">
+          @if (guardando()) {
+            <span class="spinner-border spinner-border-sm"></span> Guardando
+          } @else {
+            Guardar cambios
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ CAMBIO DE ROL ═════════════════════════════════════════════════════ -->
+@if (confirmandoRol(); as u) {
+  <div class="modal-backdrop-custom" (click)="cerrarCambioRol()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-cabecera">
+        <h3 class="modal-titulo">Cambiar rol</h3>
+        <button class="modal-cerrar" (click)="cerrarCambioRol()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-cuerpo">
+        <p class="modal-texto">
+          Rol actual de <strong>{{ nombreCompleto(u) }}</strong>:
+          <span class="badge-rol badge-{{ u.rol | lowercase }}">
+            <span class="badge-dot"></span>{{ etiquetaRol(u.rol) }}
+          </span>
+        </p>
+
+        <div class="opciones-rol">
+          <label class="opcion" [class.opcion--activa]="rolPropuesto() === 'CIUDADANO'">
+            <input type="radio" name="rol" value="CIUDADANO"
+                   [checked]="rolPropuesto() === 'CIUDADANO'"
+                   (change)="rolPropuesto.set('CIUDADANO')" />
+            <span class="opcion-cuerpo">
+              <span class="opcion-titulo">Ciudadano</span>
+              <span class="opcion-texto">Registra y consulta sus propios reportes.</span>
+            </span>
+          </label>
+
+          <label class="opcion" [class.opcion--activa]="rolPropuesto() === 'ADMIN'">
+            <input type="radio" name="rol" value="ADMIN"
+                   [checked]="rolPropuesto() === 'ADMIN'"
+                   (change)="rolPropuesto.set('ADMIN')" />
+            <span class="opcion-cuerpo">
+              <span class="opcion-titulo">Administrador</span>
+              <span class="opcion-texto">Accede al panel completo del sistema.</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-pie">
+        <button class="btn-cancelar-modal" (click)="cerrarCambioRol()" [disabled]="cambiandoRol()">
+          Cancelar
+        </button>
+        <button class="btn-confirmar" (click)="confirmarCambioRol()" [disabled]="cambiandoRol()">
+          @if (cambiandoRol()) {
+            <span class="spinner-border spinner-border-sm"></span>
+          } @else {
+            Guardar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,11 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface ReporteResumen {
   idReporte: number;
   idUsuario: number;
   idVia: number | null;
+  nombreVia?: string | null;
+  codigoSegmento?: string | null;
   imagenUrl: string;
   descripcion: string | null;
   estado: 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO' | 'DUPLICADO';
@@ -44,7 +47,15 @@ export interface ViaSegmento {
 @Injectable({ providedIn: 'root' })
 export class ReportesService {
   private http = inject(HttpClient);
-  private readonly BASE = 'http://localhost:8080/admin/reportes';
+  private readonly BASE = `${environment.apiUrl}/admin/reportes`;
+
+  listarMios(pagina = 0, tamanio = 100): Observable<PaginaDto<ReporteResumen>> {
+    return this.http.get<PaginaDto<ReporteResumen>>(`${environment.apiUrl}/reportes/mios`, { params: { pagina, tamanio } });
+  }
+
+  imagenPropia(id: number): Observable<{ url: string }> {
+    return this.http.get<{ url: string }>(`${environment.apiUrl}/reportes/${id}/imagen`);
+  }
 
   listar(
     pagina = 0,
@@ -79,6 +90,6 @@ export class ReportesService {
   }
 
   listarVias(): Observable<ViaSegmento[]> {
-    return this.http.get<ViaSegmento[]>('http://localhost:8080/admin/vias');
+    return this.http.get<ViaSegmento[]>(`${environment.apiUrl}/admin/vias`);
   }
 }

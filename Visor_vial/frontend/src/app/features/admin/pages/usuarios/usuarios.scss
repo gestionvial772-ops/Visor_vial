@@ -1,1 +1,778 @@
-@use '../proximamente';
+// ── Design Tokens (los mismos del módulo de reportes) ───────────────────────
+$primary:        #1a544a;
+$primary-hover:  #143f37;
+$primary-light:  #d4e8e3;
+$primary-xlight: #edf5f3;
+$canvas:         #f4f7f6;
+$surface:        #ffffff;
+$ink:            #1c2b27;
+$body:           #3d5450;
+$muted:          #6b8a85;
+$hairline:       #e2ecea;
+$radius-card:    14px;
+$radius-badge:   20px;
+$shadow-card:    0 1px 4px rgba(0,0,0,0.07), 0 2px 12px rgba(0,0,0,0.05);
+
+// Colores por rol, en la misma familia que los estados de reportes
+$rol-admin-bg:    #d1fae5; $rol-admin-text:  #065f46; $rol-admin-dot:  #10b981;
+$rol-ciudad-bg:   #dbeafe; $rol-ciudad-text: #1e40af; $rol-ciudad-dot: #3b82f6;
+
+
+// ── Cabecera ─────────────────────────────────────────────────────────────────
+.page-header-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: $surface;
+  border-radius: $radius-card;
+  border: 1px solid $hairline;
+  box-shadow: $shadow-card;
+  padding: 18px 22px;
+  margin-bottom: 12px;
+}
+
+.page-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: $primary-xlight;
+  color: $primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.page-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.page-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.page-subtitle {
+  font-size: 0.82rem;
+  color: $muted;
+  margin: 3px 0 0;
+}
+
+
+// ── Resumen + filtros ────────────────────────────────────────────────────────
+.resumen-card {
+  background: $surface;
+  border-radius: $radius-card;
+  border: 1px solid $hairline;
+  box-shadow: $shadow-card;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.resumen-metricas {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.metrica {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  min-width: 96px;
+  padding: 9px 14px;
+  background: $canvas;
+  border: 1px solid $hairline;
+  border-radius: 10px;
+}
+
+.metrica-valor {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: $primary;
+  line-height: 1.2;
+}
+
+.metrica-label {
+  font-size: 0.7rem;
+  color: $muted;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.filtros {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  &--buscar { min-width: 240px; }
+}
+
+.filtro-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $muted;
+}
+
+.filtro-select,
+.filtro-input {
+  font-size: 0.83rem;
+  padding: 7px 11px;
+  border: 1px solid $hairline;
+  border-radius: 8px;
+  background: $surface;
+  color: $body;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+
+  &:focus { border-color: $primary; }
+}
+
+.filtro-select { cursor: pointer; }
+
+.btn-filtrar,
+.btn-limpiar {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.btn-filtrar {
+  background: $primary;
+  border-color: $primary;
+  color: #fff;
+  &:hover { background: $primary-hover; border-color: $primary-hover; }
+}
+
+.btn-limpiar {
+  background: $surface;
+  border-color: $hairline;
+  color: $muted;
+  &:hover { background: $canvas; color: $ink; }
+}
+
+
+// ── Tarjeta de tabla ─────────────────────────────────────────────────────────
+.tabla-card {
+  background: $surface;
+  border-radius: $radius-card;
+  border: 1px solid $hairline;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.tabla-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid $hairline;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  .toolbar-left,
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+}
+
+.tabla-titulo {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.total-badge {
+  background: $primary-light;
+  color: $primary;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: $radius-badge;
+}
+
+.btn-export {
+  font-size: 0.82rem;
+  padding: 7px 14px;
+  border: 1px solid $hairline;
+  border-radius: 8px;
+  background: $surface;
+  color: $body;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  transition: all 0.15s;
+
+  &:hover { background: $primary-xlight; color: $primary; border-color: $primary; }
+}
+
+.btn-refresh {
+  background: $canvas;
+  border: 1px solid $hairline;
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: $muted;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.15s;
+
+  &:hover { background: $primary-light; color: $primary; border-color: $primary; }
+}
+
+
+// ── Estados de carga / error / vacío ─────────────────────────────────────────
+.estado-tabla {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 64px 20px;
+  color: $muted;
+  font-size: 0.875rem;
+}
+
+.estado-error { color: #c0392b; }
+
+.btn-retry {
+  background: #fff1f0;
+  border: 1px solid #fca5a5;
+  color: #c0392b;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  &:hover { background: #fee2e2; }
+}
+
+
+// ── Tabla ────────────────────────────────────────────────────────────────────
+.tabla-wrapper { overflow-x: auto; }
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead tr {
+    background: $canvas;
+
+    th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: $muted;
+      white-space: nowrap;
+      border-bottom: 1px solid $hairline;
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid $hairline;
+    transition: background 0.12s;
+
+    &:hover { background: $primary-xlight; }
+    &:last-child { border-bottom: none; }
+
+    td { padding: 11px 16px; vertical-align: middle; }
+  }
+}
+
+.col-cuenta   { min-width: 190px; }
+.col-dni      { width: 108px; }
+.col-correo   { min-width: 200px; }
+.col-rol      { width: 140px; }
+.col-reportes { width: 92px; text-align: center; }
+.col-registro { width: 108px; white-space: nowrap; }
+.col-acciones { width: 178px; }
+
+
+.cuenta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: $primary-xlight;
+  color: $primary;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid $primary-light;
+}
+
+.cuenta-nombre {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $ink;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.id-chip {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: $muted;
+  background: $canvas;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid $hairline;
+  white-space: nowrap;
+}
+
+.correo-texto {
+  font-size: 0.82rem;
+  color: $body;
+  word-break: break-word;
+}
+
+.contador {
+  display: inline-block;
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: $radius-badge;
+  background: $primary-light;
+  color: $primary;
+  font-weight: 700;
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+.sin-datos {
+  color: $hairline;
+  font-weight: 700;
+}
+
+.col-registro {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.fecha-main {
+  font-size: 0.82rem;
+  color: $body;
+  font-weight: 500;
+}
+
+.fecha-hora {
+  font-size: 0.72rem;
+  color: $muted;
+}
+
+
+// ── Badges de rol ────────────────────────────────────────────────────────────
+.badge-rol {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: $radius-badge;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;
+}
+
+.badge-admin {
+  background: $rol-admin-bg;
+  color: $rol-admin-text;
+  .badge-dot { background: $rol-admin-dot; }
+}
+
+.badge-ciudadano {
+  background: $rol-ciudad-bg;
+  color: $rol-ciudad-text;
+  .badge-dot { background: $rol-ciudad-dot; }
+}
+
+
+// ── Formulario del modal de edición ─────────────────────────────────────────
+.modal-panel--ancho { max-width: 520px; }
+
+.modal-identidad {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 13px;
+  background: $canvas;
+  border: 1px solid $hairline;
+  border-radius: 10px;
+}
+
+.modal-identidad-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-identidad-nombre {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: $ink;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-identidad-dni {
+  font-size: 0.74rem;
+  color: $muted;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $muted;
+}
+
+.form-campo {
+  width: 100%;
+  font-size: 0.85rem;
+  padding: 8px 11px;
+  border: 1px solid $hairline;
+  border-radius: 8px;
+  background: $surface;
+  color: $ink;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &:focus { border-color: $primary; }
+  &:disabled { background: $canvas; color: $muted; }
+}
+
+.form-nota {
+  margin: 0;
+  font-size: 0.74rem;
+  color: $muted;
+}
+
+.form-error {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #b91c1c;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 8px 11px;
+}
+
+.acciones-wrap {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.btn-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  border-width: 1px;
+  border-style: solid;
+
+  &:disabled { opacity: 0.55; cursor: default; }
+}
+
+.btn-editar {
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  &:hover:not(:disabled) { background: #dbeafe; border-color: #93c5fd; }
+}
+
+.btn-rol {
+  color: $primary;
+  border-color: $primary-light;
+  background: $primary-xlight;
+  &:hover:not(:disabled) { background: $primary-light; border-color: $primary; }
+}
+
+
+// ── Pie + paginación ─────────────────────────────────────────────────────────
+.tabla-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid $hairline;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: $canvas;
+}
+
+.tabla-info {
+  font-size: 0.78rem;
+  color: $muted;
+  flex-shrink: 0;
+}
+
+.paginacion {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pag-btn {
+  background: $surface;
+  border: 1px solid $hairline;
+  color: $body;
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  min-width: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:disabled { opacity: 0.35; cursor: default; }
+  &:not(:disabled):hover { background: $primary-light; color: $primary; border-color: $primary; }
+  &.activo { background: $primary; color: white; border-color: $primary; font-weight: 700; }
+}
+
+
+// ── Modal de cambio de rol ───────────────────────────────────────────────────
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 30, 26, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal-panel {
+  background: $surface;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.22);
+  animation: modal-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid $hairline;
+}
+
+.modal-titulo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0;
+}
+
+.modal-cerrar {
+  background: none;
+  border: none;
+  color: $muted;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover { background: $canvas; color: $ink; }
+}
+
+.modal-cuerpo {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-texto {
+  font-size: 0.84rem;
+  color: $body;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.opciones-rol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.opcion {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid $hairline;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: $surface;
+
+  &:hover { background: $canvas; border-color: $primary-light; }
+  &--activa { border-color: $primary; background: $primary-xlight; }
+
+  input {
+    margin-top: 2px;
+    accent-color: $primary;
+    cursor: pointer;
+  }
+}
+
+.opcion-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.opcion-titulo {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.opcion-texto {
+  font-size: 0.76rem;
+  color: $muted;
+}
+
+.modal-pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid $hairline;
+  background: $canvas;
+  border-radius: 0 0 16px 16px;
+}
+
+.btn-cancelar-modal {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  border: 1px solid $hairline;
+  border-radius: 8px;
+  background: $surface;
+  color: $body;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover:not(:disabled) { background: $hairline; }
+  &:disabled { opacity: 0.55; cursor: default; }
+}
+
+.btn-confirmar {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 7px 18px;
+  border: 1px solid $primary;
+  border-radius: 8px;
+  background: $primary;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover:not(:disabled) { background: $primary-hover; }
+  &:disabled { opacity: 0.6; cursor: default; }
+}
+
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 900px) {
+  .resumen-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filtro--buscar { min-width: 100%; }
+}

@@ -11,25 +11,44 @@ import java.util.List;
 
 public interface ReporteRepository extends JpaRepository<Reporte, Integer> {
 
-    Page<Reporte> findAllByOrderByFechaCreacionDesc(Pageable pageable);
-
-    Page<Reporte> findByEstadoOrderByFechaCreacionDesc(String estado, Pageable pageable);
-
-    @Query("SELECT r FROM Reporte r WHERE " +
+    @Query(value = "SELECT r FROM Reporte r LEFT JOIN FETCH r.via v WHERE " +
+           "r.eliminadoEn IS NULL AND " +
            "(:estado IS NULL OR r.estado = :estado) AND " +
            "(:busqueda IS NULL OR :busqueda = '' OR " +
            "LOWER(r.descripcion) LIKE LOWER(CONCAT('%', :busqueda, '%')) OR " +
-           "CAST(r.idVia AS string) LIKE CONCAT('%', :busqueda, '%')) " +
-           "ORDER BY r.fechaCreacion DESC")
+           "CAST(r.idReporte AS string) LIKE CONCAT('%', :busqueda, '%') OR " +
+           "LOWER(v.nombreVia) LIKE LOWER(CONCAT('%', :busqueda, '%')) OR " +
+           "LOWER(v.codigoSegmento) LIKE LOWER(CONCAT('%', :busqueda, '%'))) " +
+           "ORDER BY r.fechaCreacion DESC",
+           countQuery = "SELECT COUNT(r) FROM Reporte r LEFT JOIN r.via v WHERE " +
+           "r.eliminadoEn IS NULL AND " +
+           "(:estado IS NULL OR r.estado = :estado) AND " +
+           "(:busqueda IS NULL OR :busqueda = '' OR " +
+           "LOWER(r.descripcion) LIKE LOWER(CONCAT('%', :busqueda, '%')) OR " +
+           "CAST(r.idReporte AS string) LIKE CONCAT('%', :busqueda, '%') OR " +
+           "LOWER(v.nombreVia) LIKE LOWER(CONCAT('%', :busqueda, '%')) OR " +
+           "LOWER(v.codigoSegmento) LIKE LOWER(CONCAT('%', :busqueda, '%')))")
     Page<Reporte> buscar(
             @Param("estado") String estado,
             @Param("busqueda") String busqueda,
             Pageable pageable);
 
-    List<Reporte> findByIdUsuario(Integer idUsuario);
+    Page<Reporte> findByIdUsuarioAndEliminadoEnIsNullOrderByFechaCreacionDesc(
+            Integer idUsuario, Pageable pageable);
 
-    long countByEstado(String estado);
-
-    @Query("SELECT COUNT(r) FROM Reporte r")
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.eliminadoEn IS NULL")
     long contarTotal();
+
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.eliminadoEn IS NULL AND r.estado = :estado")
+    long contarActivosPorEstado(@Param("estado") String estado);
+
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.eliminadoEn IS NOT NULL")
+    long contarAnulados();
+
+    /**
+     * Reportes vigentes de un conjunto de usuarios. Se usa el panel de usuarios
+     * para mostrar cuantos reportes registro cada cuenta.
+     */
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.eliminadoEn IS NULL AND r.idUsuario IN :ids")
+    long contarReportesDeUsuarios(@Param("ids") List<Long> ids);
 }

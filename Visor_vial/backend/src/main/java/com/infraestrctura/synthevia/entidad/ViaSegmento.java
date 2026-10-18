@@ -1,6 +1,7 @@
 package com.infraestrctura.synthevia.entidad;
 
 import jakarta.persistence.*;
+import org.locationtech.jts.geom.Geometry;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -18,6 +19,9 @@ public class ViaSegmento {
     @Column(name = "nombre_via")
     private String nombreVia;
 
+    @Column(name = "geom", columnDefinition = "geometry")
+    private Geometry geom;
+
     @Column(name = "fecha_registro")
     private OffsetDateTime fechaRegistro;
 
@@ -29,6 +33,9 @@ public class ViaSegmento {
 
     public String  getNombreVia()            { return nombreVia; }
     public void    setNombreVia(String v)     { this.nombreVia = v; }
+
+    public Geometry getGeom()                { return geom; }
+    public void     setGeom(Geometry v)      { this.geom = v; }
 
     public OffsetDateTime getFechaRegistro()  { return fechaRegistro; }
     public void           setFechaRegistro(OffsetDateTime v) { this.fechaRegistro = v; }

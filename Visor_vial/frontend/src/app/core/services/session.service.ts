@@ -1,4 +1,8 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+
+import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface SesionUsuario {
   nombre: string;
@@ -7,6 +11,7 @@ export interface SesionUsuario {
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
+  private readonly http = inject(HttpClient);
   private readonly CLAVE = 'synthevia_sesion';
 
   private _usuario = signal<SesionUsuario | null>(this.cargarDesdeStorage());
@@ -20,7 +25,13 @@ export class SessionService {
     sessionStorage.setItem(this.CLAVE, JSON.stringify(usuario));
   }
 
-  cerrar(): void {
+  cerrar() {
+    return this.http.post<void>(environment.apiUrl + '/public/cerrar-sesion', {}).pipe(tap(() => {
+      this.limpiarSesionLocal();
+    }));
+  }
+
+  limpiarSesionLocal(): void {
     this._usuario.set(null);
     sessionStorage.removeItem(this.CLAVE);
   }

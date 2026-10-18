@@ -1,0 +1,15 @@
+<span class="info-tip" [class.info-tip--abierto]="abierto()">
+  <button type="button"
+          class="info-tip-boton"
+          [attr.aria-expanded]="abierto()"
+          aria-label="Ver aclaración"
+          (click)="alternar()">
+    <i class="bi bi-info-circle"></i>
+  </button>
+
+  @if (abierto()) {
+    <span class="info-tip-panel" [class.info-tip-panel--arriba]="lado === 'arriba'" role="tooltip">
+      {{ texto }}
+    </span>
+  }
+</span>

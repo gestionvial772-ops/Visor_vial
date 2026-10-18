@@ -1,6 +1,36 @@
-<div class="proxima-entrega">
-  <div class="icon-wrap"><i class="bi bi-map"></i></div>
-  <h2>Vías y Segmentos</h2>
-  <p>El catálogo geoespacial de vías y la integración con Mapbox estarán disponibles en la siguiente etapa.</p>
-  <span class="badge-proximo">Próximamente</span>
+<div class="vias-container">
+  <!-- Header -->
+  <div class="vias-header">
+    <h2><i class="bi bi-map"></i> Vías y Segmentos</h2>
+  </div>
+
+  <!-- Contenedor del Mapa -->
+  <div class="map-wrapper">
+    <div id="mapbox-container" class="mapbox-map"></div>
+    
+    <!-- Controles del Mapa -->
+    <div class="map-controls">
+      <div class="control-section">
+        <label>Mapa Base:</label>
+        <select (change)="cambiarMapaBase($event)" class="form-control">
+          <option value="satellite">Satélite</option>
+          <option value="streets">Calles</option>
+          <option value="light">Claro</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Info de Coordenadas -->
+    <div class="coords-display" id="coords-display">
+      Lat: —, Lng: —
+    </div>
+  </div>
+
+  <!-- Listado de Vías -->
+  <div class="vias-list">
+    <h3>Vías Registradas</h3>
+    <div class="vias-grid">
+      <p class="text-muted">Cargando vías desde la base de datos...</p>
+    </div>
+  </div>
 </div>

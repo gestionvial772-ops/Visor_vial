@@ -21,8 +21,10 @@ export class AdminLayout {
   }
 
   cerrarSesion() {
-    this.session.cerrar();
-    this.router.navigate(['/auth/login']);
+    this.session.cerrar().subscribe({
+      next: () => this.router.navigate(['/auth/login']),
+      error: () => alert('No se pudo cerrar la sesion. Intentalo nuevamente.'),
+    });
   }
 
   readonly navItems = [
