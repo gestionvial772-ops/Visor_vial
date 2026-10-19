@@ -36,11 +36,13 @@ public class SupabaseStorageService {
             RestClient.Builder restClientBuilder,
             @Value("${supabase.url}") String supabaseUrl,
             @Value("${supabase.secret-key}") String secretKey,
+            @Value("${supabase.service-role-key:${SUPABASE_SERVICE_ROLE_KEY}}") String serviceRoleKey,
             @Value("${supabase.storage.bucket}") String bucket) {
 
         this.restClient = restClientBuilder.clone()
                 .baseUrl(supabaseUrl + "/storage/v1")
                 .defaultHeader("apikey", secretKey)
+                .defaultHeader("Authorization", "Bearer " + serviceRoleKey)
                 .build();
 
         this.restClientExterno = restClientBuilder.clone()
@@ -90,7 +92,7 @@ public class SupabaseStorageService {
             throw new IllegalStateException("No se pudo leer la imagen recibida.", e);
 
         } catch (Exception e) {
-            throw new IllegalStateException(  "No se pudo subir la imagen a Supabase Storage.",e);
+            throw new IllegalStateException("No se pudo subir la imagen a Supabase Storage.", e);
         }
     }
 
@@ -111,8 +113,10 @@ public class SupabaseStorageService {
      * URL que puede cargar un navegador. El bucket es privado, asi que no se
      * puede usar /object/public: hay que firmar la ruta con una clave temporal.
      *
-     * <p>Si el valor ya es una URL absoluta se devuelve tal cual, porque en ese
-     * caso el reporte se creo desde el panel con una URL publica.</p>
+     * <p>
+     * Si el valor ya es una URL absoluta se devuelve tal cual, porque en ese
+     * caso el reporte se creo desde el panel con una URL publica.
+     * </p>
      */
     public String urlPublica(String imagenUrl) {
 
@@ -152,8 +156,7 @@ public class SupabaseStorageService {
     }
 
     private record Firma(
-            @JsonProperty("signedURL")
-            String signedUrl) {
+            @JsonProperty("signedURL") String signedUrl) {
     }
 
     /**
@@ -261,6 +264,7 @@ public class SupabaseStorageService {
             throw new IllegalArgumentException("Formato de imagen no permitido.");
         }
     }
+
     private String obtenerExtension(String contentType) {
 
         return switch (contentType) {
