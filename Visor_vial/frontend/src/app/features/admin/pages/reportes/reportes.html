@@ -382,7 +382,10 @@
                 </span>
               </div>
               <div class="ia-veredicto-item">
-                <span class="ia-dato-label">Confianza</span>
+                <span class="ia-dato-label">
+                  Calidad de evidencia
+                  <app-info-tip texto="No es la confianza del diagnóstico, sino qué tan legible era la foto. Es el promedio de cinco factores: encuadre, distancia y escala, iluminación, nitidez y oclusión." />
+                </span>
                 <span class="ia-dato-valor">
                   @if (a.nivelConfianza !== null) {
                     {{ a.nivelConfianza | number:'1.0-0' }}%
@@ -401,7 +404,11 @@
                     <th class="ia-col-tipo">Deterioro</th>
                     <th class="ia-col-si">Detectado</th>
                     <th class="ia-col-cant">Cantidad</th>
-                    <th class="ia-col-conf">Confianza</th>
+                    <th class="ia-col-conf">
+                      Confianza del tipo
+                      <app-info-tip lado="arriba"
+                                   texto="Certeza de la IA sobre este tipo de deterioro en concreto. Es distinto de la calidad de la foto, que se mide arriba." />
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -453,6 +460,11 @@
               </span>
             </div>
 
+          } @else if (errorAnalisis()) {
+            <div class="ia-estado ia-estado--vacio">
+              <i class="bi bi-wifi-off"></i>
+              <span>No se pudo cargar el análisis. Verifica tu conexión y vuelve a abrir el reporte.</span>
+            </div>
           } @else {
             <div class="ia-estado ia-estado--vacio">
               <i class="bi bi-exclamation-circle"></i>

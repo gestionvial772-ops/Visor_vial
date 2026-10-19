@@ -44,4 +44,11 @@ public interface ReporteRepository extends JpaRepository<Reporte, Integer> {
 
     @Query("SELECT COUNT(r) FROM Reporte r WHERE r.eliminadoEn IS NOT NULL")
     long contarAnulados();
+
+    /**
+     * Reportes vigentes de un conjunto de usuarios. Se usa el panel de usuarios
+     * para mostrar cuantos reportes registro cada cuenta.
+     */
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.eliminadoEn IS NULL AND r.idUsuario IN :ids")
+    long contarReportesDeUsuarios(@Param("ids") List<Long> ids);
 }

@@ -5,6 +5,7 @@ import { ReportesService, ReporteResumen, Estadisticas, NuevoReporteDto, ViaSegm
 import { AnalisisService } from '../../../../core/services/analisis.service';
 import { AnalisisIa, CoordenadaReporte } from '../../../../core/models/reporte.model';
 import { ToastService } from '../../../../core/services/toast.service';
+import { InfoTip } from '../../../../shared/components/info-tip/info-tip';
 
 /** Pipe helper: devuelve el menor de dos números (usado en la paginación del pie) */
 import { Pipe, PipeTransform } from '@angular/core';
@@ -18,7 +19,7 @@ export class MinPipe implements PipeTransform {
 
 @Component({
   selector: 'app-reportes',
-  imports: [CommonModule, FormsModule, DecimalPipe, MinPipe],
+  imports: [CommonModule, FormsModule, DecimalPipe, MinPipe, InfoTip],
   templateUrl: './reportes.html',
   styleUrl: './reportes.scss',
 })
@@ -55,6 +56,7 @@ export class Reportes implements OnInit {
   coordenadaDetalle   = signal<CoordenadaReporte | null>(null);
   cargandoAnalisis    = signal(false);
   reanalizando        = signal(false);
+  errorAnalisis       = signal(false);
 
   /**
    * URLs firmadas de las imágenes indexadas por idReporte. El bucket de
@@ -199,6 +201,7 @@ export class Reportes implements OnInit {
     this.reporteVista.set(null);
     this.analisis.set(null);
     this.coordenadaDetalle.set(null);
+    this.errorAnalisis.set(false);
   }
 
   /** URL a usar en el <img>: la firmada si se pudo resolver, si no la original. */
@@ -221,6 +224,7 @@ export class Reportes implements OnInit {
   private cargarAnalisis(idReporte: number): void {
     this.analisis.set(null);
     this.coordenadaDetalle.set(null);
+    this.errorAnalisis.set(false);
     this.cargandoAnalisis.set(true);
 
     this.analisisSvc.obtenerDetalle(idReporte).subscribe({
@@ -229,8 +233,13 @@ export class Reportes implements OnInit {
         this.coordenadaDetalle.set(detalle.coordenada);
         this.cargandoAnalisis.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('No se pudo cargar el detalle del reporte:', err);
+
+        // Sin esto el panel cae en el estado "Sin analizar", que miente:
+        // el reporte puede estar analizado y solo fallo la lectura.
         this.analisis.set(null);
+        this.errorAnalisis.set(true);
         this.cargandoAnalisis.set(false);
       },
     });
@@ -257,11 +266,12 @@ export class Reportes implements OnInit {
       error: (err) => {
         this.reanalizando.set(false);
 
-        const detalle = err?.error?.detalle;
-        const mensaje = err?.error?.mensaje;
+        // La causa tecnica (respuesta cruda de Gemini, finishReason, cuerpo JSON)
+        // se queda en consola: en pantalla solo va un mensaje accionable.
+        console.error('Fallo el reanálisis con IA:', err);
 
         this.toast.mostrar(
-          detalle ? `${mensaje} (${detalle})` : mensaje || 'No se pudo completar el reanálisis con IA',
+          this.mensajeErrorAnalisis(err),
           false,
           'Falló el análisis',
         );
@@ -271,6 +281,37 @@ export class Reportes implements OnInit {
 
   claseSeveridad(severidad: number): string {
     return `sev-${severidad}`;
+  }
+
+  /**
+   * Traduce el fallo del reanálisis a un mensaje que el admin pueda actuar.
+   * El detalle técnico va a consola; mostrarlo en el toast solo confunde.
+   */
+  private mensajeErrorAnalisis(err: unknown): string {
+    const status = (err as { status?: number })?.status;
+    const backend = (err as { error?: { mensaje?: string } })?.error?.mensaje;
+
+    switch (status) {
+      case 0:
+        return 'No hay conexión con el servidor. Revisa tu red e inténtalo de nuevo.';
+
+      case 404:
+        return 'El reporte ya no existe. Cierra esta ventana y actualiza la lista.';
+
+      case 400:
+        return backend || 'El reporte no tiene una imagen válida para analizar.';
+
+      case 429:
+        return 'Se alcanzó la cuota de análisis del día. Vuelve a intentarlo mañana.';
+
+      case 502:
+      case 503:
+      case 504:
+        return 'El servicio de análisis no responde. Inténtalo en unos minutos.';
+
+      default:
+        return backend || 'No se pudo completar el análisis con IA.';
+    }
   }
 
   // ── Modal Editar ──────────────────────────────────────────────────────────

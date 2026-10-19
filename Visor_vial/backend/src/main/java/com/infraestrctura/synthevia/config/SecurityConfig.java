@@ -53,7 +53,8 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health", "/public/**").permitAll()
                         // Restaurar la consulta del panel como antes del cambio de autenticacion.
                         .requestMatchers(HttpMethod.GET, "/admin/reportes", "/admin/reportes/**",
-                                "/admin/vias", "/admin/vias/**").permitAll()
+                                "/admin/vias", "/admin/vias/**",
+                                "/admin/usuarios", "/admin/usuarios/**").permitAll()
                         // Temporal, solicitado para probar sin una cuenta ADMIN.
                         // .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/admin/**").authenticated()

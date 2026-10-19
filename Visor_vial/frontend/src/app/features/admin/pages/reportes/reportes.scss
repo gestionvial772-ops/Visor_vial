@@ -1684,7 +1684,10 @@ $col-duplicado-bg:   #f3f4f6; $col-duplicado-text:  #4b5563; $col-duplicado-dot:
   background: $surface;
   border: 1px solid $hairline;
   border-radius: 11px;
-  overflow: hidden;
+
+  // Sin overflow hidden: recortaria el tooltip del icono de informacion.
+  // El radio de la cabecera se aplica directo en sus th, que es lo que
+  // necesitas el overflow.
 }
 
 .ia-tabla {
@@ -1703,6 +1706,10 @@ $col-duplicado-bg:   #f3f4f6; $col-duplicado-text:  #4b5563; $col-duplicado-dot:
   text-align: left;
   padding: 8px 12px;
   border-bottom: 1px solid $hairline;
+
+  // Redondea solo las esquinas superiores para respetar el radio del contenedor.
+  &:first-child { border-top-left-radius: 10px; }
+  &:last-child  { border-top-right-radius: 10px; }
 }
 
 .ia-tabla tbody td {

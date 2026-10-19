@@ -355,7 +355,7 @@ export class NuevoReporte implements OnInit, AfterViewInit, OnDestroy {
           console.log('Reporte registrado correctamente:', respuesta);
 
           this.mensajeExito =
-            'Reporte registrado. El personal municipal lo revisará.';
+            'Reporte registrado correctamente y disponible para consulta.';
           this.mensajeError = '';
           this.reporteEnviado = true; // Marcar como enviado
           this.cdr.detectChanges();
