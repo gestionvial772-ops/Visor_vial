@@ -1,7 +1,13 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReportesService, ReporteResumen, Estadisticas, NuevoReporteDto, ViaSegmento } from '../../../../core/services/reportes.service';
+import {
+  ReportesService,
+  ReporteResumen,
+  Estadisticas,
+  NuevoReporteDto,
+  ViaSegmento,
+} from '../../../../core/services/reportes.service';
 import { AnalisisService } from '../../../../core/services/analisis.service';
 import { AnalisisIa, CoordenadaReporte } from '../../../../core/models/reporte.model';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -9,7 +15,7 @@ import { InfoTip } from '../../../../shared/components/info-tip/info-tip';
 
 /** Pipe helper: devuelve el menor de dos números (usado en la paginación del pie) */
 import { Pipe, PipeTransform } from '@angular/core';
-
+declare const mapboxgl: any;
 @Pipe({ name: 'min', standalone: true })
 export class MinPipe implements PipeTransform {
   transform(values: number[]): number {
@@ -24,23 +30,24 @@ export class MinPipe implements PipeTransform {
   styleUrl: './reportes.scss',
 })
 export class Reportes implements OnInit {
-  private svc   = inject(ReportesService);
+  private svc = inject(ReportesService);
   private toast = inject(ToastService);
   private analisisSvc = inject(AnalisisService);
+  private mapaAdmin: any = null;
 
   // Estado de la lista
-  reportes       = signal<ReporteResumen[]>([]);
+  reportes = signal<ReporteResumen[]>([]);
   totalElementos = signal(0);
-  totalPaginas   = signal(0);
-  paginaActual   = signal(0);
-  cargando       = signal(false);
-  errorCarga     = signal(false);
+  totalPaginas = signal(0);
+  paginaActual = signal(0);
+  cargando = signal(false);
+  errorCarga = signal(false);
   mensajeErrorCarga = signal('');
 
   // Filtros
-  filtroEstado    = '';
-  filtroBusqueda  = '';
-  tamanio         = 10;
+  filtroEstado = '';
+  filtroBusqueda = '';
+  tamanio = 10;
 
   // Estadísticas
   estadisticas = signal<Estadisticas | null>(null);
@@ -49,45 +56,43 @@ export class Reportes implements OnInit {
   vias = signal<ViaSegmento[]>([]);
 
   // Modal — ver detalle (solo lectura)
-  reporteVista        = signal<ReporteResumen | null>(null);
+  reporteVista = signal<ReporteResumen | null>(null);
 
   // Panel de análisis de IA
-  analisis            = signal<AnalisisIa | null>(null);
-  coordenadaDetalle   = signal<CoordenadaReporte | null>(null);
-  cargandoAnalisis    = signal(false);
-  reanalizando        = signal(false);
-  errorAnalisis       = signal(false);
+  analisis = signal<AnalisisIa | null>(null);
+  coordenadaDetalle = signal<CoordenadaReporte | null>(null);
+  cargandoAnalisis = signal(false);
+  reanalizando = signal(false);
+  errorAnalisis = signal(false);
+  viaSeleccionadaAdmin = signal<number | null>(null);
+  guardandoVia = signal(false);
+  viaGeoJsonAdmin = signal<any | null>(null);
+  busquedaViaAdmin = signal('');
 
-  /**
-   * URLs firmadas de las imágenes indexadas por idReporte. El bucket de
-   * Supabase Storage es privado, asi que la ruta guardada en imagen_url no la
-   * puede cargar el navegador. Debe ser un signal: si fuera un Map comun,
-   * Angular no detectaria el cambio cuando llega la URL y las miniaturas
-   * quedarian en blanco hasta que otra accion dispare el render.
-   */
   private readonly imagenes = signal<Record<number, string>>({});
+  private readonly mapboxToken =
+    'pk.eyJ1IjoiaGFsZm9uc28xMjM0NSIsImEiOiJjbW8wYnJ1dncwNm5lMndweWttbTNhYmg2In0.LC3mGJP8ib3exVL-VGZyyg';
 
-  /** URL lista para el <img> de un reporte, o null si aún no se resolvió. */
   urlImagen(idReporte: number): string | null {
     return this.imagenes()[idReporte] ?? null;
   }
 
   // Modal — editar estado
   reporteSeleccionado = signal<ReporteResumen | null>(null);
-  nuevoEstado         = signal('');
-  guardandoEstado     = signal(false);
+  nuevoEstado = signal('');
+  guardandoEstado = signal(false);
 
   // Modal — eliminar
-  reporteAEliminar    = signal<ReporteResumen | null>(null);
-  eliminando          = signal(false);
+  reporteAEliminar = signal<ReporteResumen | null>(null);
+  eliminando = signal(false);
 
   // Modal — nuevo reporte
-  mostrarModalNuevo   = signal(false);
-  guardandoNuevo      = signal(false);
-  previewEstado       = signal<'vacio' | 'cargando' | 'ok' | 'error'>('vacio');
+  mostrarModalNuevo = signal(false);
+  guardandoNuevo = signal(false);
+  previewEstado = signal<'vacio' | 'cargando' | 'ok' | 'error'>('vacio');
   nuevoForm = {
-    idVia:       null as number | null,
-    imagenUrl:   '',
+    idVia: null as number | null,
+    imagenUrl: '',
     descripcion: '',
   };
 
@@ -95,18 +100,18 @@ export class Reportes implements OnInit {
   private previewTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly estadosOpciones = [
-    { valor: '',           etiqueta: 'Todos los estados' },
-    { valor: 'PENDIENTE',  etiqueta: 'Pendiente'         },
-    { valor: 'EN_PROCESO', etiqueta: 'En proceso'        },
-    { valor: 'RESUELTO',   etiqueta: 'Resuelto'          },
-    { valor: 'DUPLICADO',  etiqueta: 'Duplicado'         },
+    { valor: '', etiqueta: 'Todos los estados' },
+    { valor: 'PENDIENTE', etiqueta: 'Pendiente' },
+    { valor: 'EN_PROCESO', etiqueta: 'En proceso' },
+    { valor: 'RESUELTO', etiqueta: 'Resuelto' },
+    { valor: 'DUPLICADO', etiqueta: 'Duplicado' },
   ];
 
   readonly estadosCambio = [
-    { valor: 'PENDIENTE',  etiqueta: 'Pendiente'  },
+    { valor: 'PENDIENTE', etiqueta: 'Pendiente' },
     { valor: 'EN_PROCESO', etiqueta: 'En proceso' },
-    { valor: 'RESUELTO',   etiqueta: 'Resuelto'   },
-    { valor: 'DUPLICADO',  etiqueta: 'Duplicado'  },
+    { valor: 'RESUELTO', etiqueta: 'Resuelto' },
+    { valor: 'DUPLICADO', etiqueta: 'Duplicado' },
   ];
 
   ngOnInit(): void {
@@ -147,10 +152,13 @@ export class Reportes implements OnInit {
         this.cargando.set(false);
         this.errorCarga.set(true);
         this.mensajeErrorCarga.set(
-          error.status === 401 ? 'Tu sesión venció. Vuelve a iniciar sesión.' :
-          error.status === 403 ? 'Tu cuenta no tiene permiso para consultar todos los reportes. Se requiere el rol ADMIN.' :
-          error.status === 0 ? 'No se pudo conectar con el servidor. Comprueba que el backend esté encendido.' :
-          'El servidor no pudo cargar los reportes. Intenta nuevamente.'
+          error.status === 401
+            ? 'Tu sesión venció. Vuelve a iniciar sesión.'
+            : error.status === 403
+              ? 'Tu cuenta no tiene permiso para consultar todos los reportes. Se requiere el rol ADMIN.'
+              : error.status === 0
+                ? 'No se pudo conectar con el servidor. Comprueba que el backend esté encendido.'
+                : 'El servidor no pudo cargar los reportes. Intenta nuevamente.',
         );
       },
     });
@@ -166,10 +174,8 @@ export class Reportes implements OnInit {
     }
 
     this.analisisSvc.obtenerImagen(idReporte).subscribe({
-      next: (r) =>
-        this.imagenes.update((mapa) => ({ ...mapa, [idReporte]: r.url })),
-      error: () =>
-        this.imagenes.update((mapa) => ({ ...mapa, [idReporte]: '' })),
+      next: (r) => this.imagenes.update((mapa) => ({ ...mapa, [idReporte]: r.url })),
+      error: () => this.imagenes.update((mapa) => ({ ...mapa, [idReporte]: '' })),
     });
   }
 
@@ -178,9 +184,9 @@ export class Reportes implements OnInit {
   }
 
   limpiarFiltros(): void {
-    this.filtroEstado   = '';
+    this.filtroEstado = '';
     this.filtroBusqueda = '';
-    this.tamanio        = 10;
+    this.tamanio = 10;
     this.cargarReportes(0);
   }
 
@@ -256,11 +262,7 @@ export class Reportes implements OnInit {
     this.analisisSvc.reanalizar(r.idReporte).subscribe({
       next: () => {
         this.reanalizando.set(false);
-        this.toast.mostrar(
-          `Reporte #${r.idReporte} analizado`,
-          true,
-          'Análisis completado',
-        );
+        this.toast.mostrar(`Reporte #${r.idReporte} analizado`, true, 'Análisis completado');
         this.cargarAnalisis(r.idReporte);
       },
       error: (err) => {
@@ -270,11 +272,7 @@ export class Reportes implements OnInit {
         // se queda en consola: en pantalla solo va un mensaje accionable.
         console.error('Fallo el reanálisis con IA:', err);
 
-        this.toast.mostrar(
-          this.mensajeErrorAnalisis(err),
-          false,
-          'Falló el análisis',
-        );
+        this.toast.mostrar(this.mensajeErrorAnalisis(err), false, 'Falló el análisis');
       },
     });
   }
@@ -316,10 +314,12 @@ export class Reportes implements OnInit {
 
   // ── Modal Editar ──────────────────────────────────────────────────────────
   abrirDetalle(r: ReporteResumen): void {
-    this.reporteSeleccionado.set(r);
-    this.nuevoEstado.set(r.estado);
-    this.resolverImagen(r.idReporte);
-  }
+  this.reporteSeleccionado.set(r);
+  this.nuevoEstado.set(r.estado);
+  this.viaSeleccionadaAdmin.set(r.idVia);
+  this.busquedaViaAdmin.set('');
+  this.resolverImagen(r.idReporte);
+}
 
   cerrarDetalle(): void {
     this.reporteSeleccionado.set(null);
@@ -335,7 +335,7 @@ export class Reportes implements OnInit {
         this.toast.mostrar(
           `Reporte #${r.idReporte} actualizado a "${this.etiquetaEstado(actualizado.estado)}"`,
           true,
-          'Estado actualizado'
+          'Estado actualizado',
         );
         this.cerrarDetalle();
         this.cargarReportes(this.paginaActual());
@@ -344,6 +344,38 @@ export class Reportes implements OnInit {
       error: () => {
         this.guardandoEstado.set(false);
         this.toast.mostrar('No se pudo actualizar el estado', false, 'No se pudo guardar');
+      },
+    });
+  }
+
+  guardarVia(): void {
+    const reporte = this.reporteSeleccionado();
+    const idVia = this.viaSeleccionadaAdmin();
+
+    if (!reporte || idVia === null) {
+      return;
+    }
+
+    this.guardandoVia.set(true);
+
+    this.svc.asignarVia(reporte.idReporte, idVia).subscribe({
+      next: () => {
+        this.guardandoVia.set(false);
+
+        this.toast.mostrar(
+          `Reporte #${reporte.idReporte} vinculado correctamente`,
+          true,
+          'Vía asignada',
+        );
+
+        this.cargarReportes(this.paginaActual());
+        this.cerrarDetalle();
+      },
+
+      error: () => {
+        this.guardandoVia.set(false);
+
+        this.toast.mostrar('No se pudo asignar la vía al reporte', false, 'Error de vinculación');
       },
     });
   }
@@ -395,12 +427,15 @@ export class Reportes implements OnInit {
   onUrlChange(): void {
     if (this.previewTimer) clearTimeout(this.previewTimer);
     const url = this.nuevoForm.imagenUrl.trim();
-    if (!url) { this.previewEstado.set('vacio'); return; }
+    if (!url) {
+      this.previewEstado.set('vacio');
+      return;
+    }
     this.previewEstado.set('cargando');
     // Espera 600ms desde que dejó de escribir para cargar
     this.previewTimer = setTimeout(() => {
       const img = new Image();
-      img.onload  = () => this.previewEstado.set('ok');
+      img.onload = () => this.previewEstado.set('ok');
       img.onerror = () => this.previewEstado.set('error');
       img.src = url;
     }, 600);
@@ -418,19 +453,15 @@ export class Reportes implements OnInit {
     }
     this.guardandoNuevo.set(true);
     const dto: NuevoReporteDto = {
-      idUsuario:   1,
-      idVia:       this.nuevoForm.idVia ?? undefined,
-      imagenUrl:   this.nuevoForm.imagenUrl.trim(),
+      idUsuario: 1,
+      idVia: this.nuevoForm.idVia ?? undefined,
+      imagenUrl: this.nuevoForm.imagenUrl.trim(),
       descripcion: this.nuevoForm.descripcion.trim() || undefined,
     };
     this.svc.crear(dto).subscribe({
       next: (r) => {
         this.guardandoNuevo.set(false);
-        this.toast.mostrar(
-          `Reporte #${r.idReporte} creado correctamente`,
-          true,
-          'Reporte creado'
-        );
+        this.toast.mostrar(`Reporte #${r.idReporte} creado correctamente`, true, 'Reporte creado');
         this.cerrarModalNuevo();
         this.cargarReportes(0);
         this.cargarEstadisticas();
@@ -444,18 +475,18 @@ export class Reportes implements OnInit {
 
   exportarCsv(): void {
     const headers = ['ID', 'Descripcion', 'Estado', 'Via', 'Fecha'];
-    const filas = this.reportes().map(r => [
+    const filas = this.reportes().map((r) => [
       r.idReporte,
       `"${(r.descripcion ?? '').replace(/"/g, '""')}"`,
       r.estado,
       r.idVia ?? '',
       r.fechaCreacion,
     ]);
-    const csv = [headers, ...filas].map(f => f.join(',')).join('\n');
+    const csv = [headers, ...filas].map((f) => f.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
     a.download = `reportes_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
@@ -472,22 +503,137 @@ export class Reportes implements OnInit {
 
   etiquetaEstado(estado: string): string {
     const mapa: Record<string, string> = {
-      PENDIENTE:  'Pendiente',
+      PENDIENTE: 'Pendiente',
       EN_PROCESO: 'En proceso',
-      RESUELTO:   'Resuelto',
-      DUPLICADO:  'Duplicado',
+      RESUELTO: 'Resuelto',
+      DUPLICADO: 'Duplicado',
     };
     return mapa[estado] ?? estado;
   }
 
   paginasVisibles(): number[] {
-    const total   = this.totalPaginas();
-    const actual  = this.paginaActual();
+    const total = this.totalPaginas();
+    const actual = this.paginaActual();
     const ventana = 2;
-    const inicio  = Math.max(0, actual - ventana);
-    const fin     = Math.min(total - 1, actual + ventana);
+    const inicio = Math.max(0, actual - ventana);
+    const fin = Math.min(total - 1, actual + ventana);
     const arr: number[] = [];
     for (let i = inicio; i <= fin; i++) arr.push(i);
     return arr;
   }
+
+  seleccionarViaAdmin(idVia: number | null): void {
+    this.viaSeleccionadaAdmin.set(idVia);
+    this.viaGeoJsonAdmin.set(null);
+
+    if (idVia === null) {
+      this.busquedaViaAdmin.set('');
+      return;
+    }
+
+    const via = this.vias().find((v) => v.idVia === idVia);
+
+    if (via) {
+      this.busquedaViaAdmin.set(`${via.nombreVia || 'Vía sin nombre'} — ${via.codigoSegmento}`);
+    }
+
+    this.svc.obtenerViaGeoJson(idVia).subscribe({
+      next: (geoJson) => {
+        this.viaGeoJsonAdmin.set(geoJson);
+        this.mostrarViaEnMapa(geoJson);
+      },
+      error: () => {
+        this.toast.mostrar('No se pudo cargar la ubicación del segmento', false, 'Error de mapa');
+      },
+    });
+  }
+  private mostrarViaEnMapa(geoJson: any): void {
+    if (typeof mapboxgl === 'undefined') {
+      console.error('Mapbox GL JS no está cargado');
+      return;
+    }
+
+    mapboxgl.accessToken = this.mapboxToken;
+
+    if (!this.mapaAdmin) {
+      this.mapaAdmin = new mapboxgl.Map({
+        container: 'mapa-via-admin',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-79.028, -8.111],
+        zoom: 13,
+      });
+
+      this.mapaAdmin.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+      this.mapaAdmin.on('load', () => {
+        this.dibujarViaSeleccionada(geoJson);
+      });
+
+      this.mapaAdmin.on('error', (error: any) => {
+        console.error('Error Mapbox admin:', error);
+      });
+
+      return;
+    }
+
+    this.dibujarViaSeleccionada(geoJson);
+  }
+  private dibujarViaSeleccionada(geoJson: any): void {
+    const sourceId = 'via-seleccionada-admin';
+    const layerId = 'via-seleccionada-admin-linea';
+
+    const source = this.mapaAdmin.getSource(sourceId);
+
+    if (source) {
+      source.setData(geoJson);
+    } else {
+      this.mapaAdmin.addSource(sourceId, {
+        type: 'geojson',
+        data: geoJson,
+      });
+
+      this.mapaAdmin.addLayer({
+        id: layerId,
+        type: 'line',
+        source: sourceId,
+        paint: {
+          'line-width': 6,
+          'line-opacity': 0.9,
+        },
+      });
+    }
+
+    const coordenadas = geoJson?.geometry?.coordinates;
+
+    if (!coordenadas?.length) {
+      return;
+    }
+
+    const bounds = new mapboxgl.LngLatBounds();
+
+    coordenadas.forEach((coordenada: number[]) => {
+      bounds.extend(coordenada);
+    });
+
+    this.mapaAdmin.fitBounds(bounds, {
+      padding: 50,
+      maxZoom: 18,
+    });
+  }
+  viasFiltradasAdmin = computed(() => {
+    const termino = this.busquedaViaAdmin().trim().toLowerCase();
+
+    if (!termino) {
+      return [];
+    }
+
+    return this.vias()
+      .filter((via) => {
+        const nombre = (via.nombreVia ?? '').toLowerCase();
+        const codigo = (via.codigoSegmento ?? '').toLowerCase();
+
+        return nombre.includes(termino) || codigo.includes(termino);
+      })
+      .slice(0, 20);
+  });
 }

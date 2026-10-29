@@ -5,7 +5,9 @@
   </div>
   <div class="page-header-text">
     <h1 class="page-title">Reportes de daños</h1>
-    <p class="page-subtitle">Gestiona y consulta todos los reportes de daños registrados en el sistema.</p>
+    <p class="page-subtitle">
+      Gestiona y consulta todos los reportes de daños registrados en el sistema.
+    </p>
   </div>
   <button class="btn-nuevo-reporte" (click)="abrirModalNuevo()">
     <i class="bi bi-plus-lg"></i>
@@ -29,11 +31,13 @@
       <label class="filtro-label">Buscar</label>
       <div class="input-icon-wrap">
         <i class="bi bi-search input-icon"></i>
-        <input class="filtro-input"
-               type="text"
-               placeholder="ID de reporte, vía, código o descripción…"
-               [(ngModel)]="filtroBusqueda"
-               (keyup.enter)="aplicarFiltro()" />
+        <input
+          class="filtro-input"
+          type="text"
+          placeholder="ID de reporte, vía, código o descripción…"
+          [(ngModel)]="filtroBusqueda"
+          (keyup.enter)="aplicarFiltro()"
+        />
       </div>
     </div>
 
@@ -51,7 +55,6 @@
 <!-- ══ TARJETAS DE ESTADÍSTICAS ═══════════════════════════════════════ -->
 @if (estadisticas()) {
   <div class="stats-grid">
-
     <div class="stat-card stat-card--total">
       <div class="stat-icon stat-icon--total">
         <i class="bi bi-clipboard2-data-fill"></i>
@@ -71,7 +74,11 @@
         <span class="stat-value">{{ estadisticas()!.pendientes }}</span>
         <span class="stat-label">Pendientes</span>
         <span class="stat-sub">
-          {{ estadisticas()!.total > 0 ? ((estadisticas()!.pendientes / estadisticas()!.total) * 100 | number:'1.0-1') : 0 }}% del total
+          {{
+            estadisticas()!.total > 0
+              ? ((estadisticas()!.pendientes / estadisticas()!.total) * 100 | number: '1.0-1')
+              : 0
+          }}% del total
         </span>
       </div>
     </div>
@@ -84,7 +91,11 @@
         <span class="stat-value">{{ estadisticas()!.enProceso }}</span>
         <span class="stat-label">En proceso</span>
         <span class="stat-sub">
-          {{ estadisticas()!.total > 0 ? ((estadisticas()!.enProceso / estadisticas()!.total) * 100 | number:'1.0-1') : 0 }}% del total
+          {{
+            estadisticas()!.total > 0
+              ? ((estadisticas()!.enProceso / estadisticas()!.total) * 100 | number: '1.0-1')
+              : 0
+          }}% del total
         </span>
       </div>
     </div>
@@ -97,7 +108,11 @@
         <span class="stat-value">{{ estadisticas()!.resueltos }}</span>
         <span class="stat-label">Resueltos</span>
         <span class="stat-sub">
-          {{ estadisticas()!.total > 0 ? ((estadisticas()!.resueltos / estadisticas()!.total) * 100 | number:'1.0-1') : 0 }}% del total
+          {{
+            estadisticas()!.total > 0
+              ? ((estadisticas()!.resueltos / estadisticas()!.total) * 100 | number: '1.0-1')
+              : 0
+          }}% del total
         </span>
       </div>
     </div>
@@ -111,18 +126,20 @@
           <span class="stat-value">{{ estadisticas()!.duplicados }}</span>
           <span class="stat-label">Duplicados</span>
           <span class="stat-sub">
-            {{ estadisticas()!.total > 0 ? ((estadisticas()!.duplicados / estadisticas()!.total) * 100 | number:'1.0-1') : 0 }}% del total
+            {{
+              estadisticas()!.total > 0
+                ? ((estadisticas()!.duplicados / estadisticas()!.total) * 100 | number: '1.0-1')
+                : 0
+            }}% del total
           </span>
         </div>
       </div>
     }
-
   </div>
 }
 
 <!-- ══ TABLA ════════════════════════════════════════════════════════ -->
 <div class="tabla-card">
-
   <!-- Toolbar -->
   <div class="tabla-toolbar">
     <div class="toolbar-left">
@@ -145,7 +162,7 @@
   <!-- Estado de carga / error / vacío -->
   @if (cargando()) {
     <div class="estado-tabla">
-      <div class="spinner-border text-secondary" style="width:2rem;height:2rem"></div>
+      <div class="spinner-border text-secondary" style="width: 2rem; height: 2rem"></div>
       <span>Cargando reportes…</span>
     </div>
   } @else if (errorCarga()) {
@@ -184,10 +201,12 @@
               </td>
               <td class="col-img">
                 @if (srcImagen(r); as src) {
-                  <img [src]="src"
-                       alt="Reporte #{{ r.idReporte }}"
-                       class="thumb"
-                       (error)="onImgError($event)" />
+                  <img
+                    [src]="src"
+                    alt="Reporte #{{ r.idReporte }}"
+                    class="thumb"
+                    (error)="onImgError($event)"
+                  />
                 } @else {
                   <div class="thumb-placeholder">
                     <i class="bi bi-image text-muted"></i>
@@ -196,7 +215,6 @@
               </td>
               <td class="col-desc">
                 <span class="desc-text">{{ r.descripcion || '—' }}</span>
-
               </td>
               <td class="col-estado">
                 <span class="badge-estado badge-{{ r.estado | lowercase }}">
@@ -208,25 +226,38 @@
                 @if (r.idVia) {
                   <span class="geo-chip">
                     <i class="bi bi-signpost-2-fill"></i>
-                    {{ r.nombreVia || 'Vía sin nombre' }}{{ r.codigoSegmento ? ' — ' + r.codigoSegmento : '' }}
+                    {{ r.nombreVia || 'Vía sin nombre'
+                    }}{{ r.codigoSegmento ? ' — ' + r.codigoSegmento : '' }}
                   </span>
                 } @else {
-                  <span class="text-muted small fst-italic">Sin vía</span>
+                  <span class="text-muted small fst-italic">Pendiente de asignacion</span>
                 }
               </td>
               <td class="col-fecha">
-                <span class="fecha-main">{{ r.fechaCreacion | date:'dd/MM/yyyy' }}</span>
-                <span class="fecha-hora">{{ r.fechaCreacion | date:'HH:mm' }}</span>
+                <span class="fecha-main">{{ r.fechaCreacion | date: 'dd/MM/yyyy' }}</span>
+                <span class="fecha-hora">{{ r.fechaCreacion | date: 'HH:mm' }}</span>
               </td>
               <td class="col-acciones">
                 <div class="acciones-wrap">
-                  <button class="btn-accion btn-accion--ver" (click)="abrirVista(r)" title="Ver detalle">
+                  <button
+                    class="btn-accion btn-accion--ver"
+                    (click)="abrirVista(r)"
+                    title="Ver detalle"
+                  >
                     <i class="bi bi-eye"></i> Ver
                   </button>
-                  <button class="btn-accion btn-accion--editar" (click)="abrirDetalle(r)" title="Editar estado">
+                  <button
+                    class="btn-accion btn-accion--editar"
+                    (click)="abrirDetalle(r)"
+                    title="Editar estado"
+                  >
                     <i class="bi bi-pencil"></i> Editar
                   </button>
-                  <button class="btn-accion btn-accion--eliminar" (click)="confirmarEliminar(r)" title="Anular reporte">
+                  <button
+                    class="btn-accion btn-accion--eliminar"
+                    (click)="confirmarEliminar(r)"
+                    title="Anular reporte"
+                  >
                     <i class="bi bi-trash3"></i> Anular
                   </button>
                 </div>
@@ -241,16 +272,25 @@
     <div class="tabla-footer">
       <span class="tabla-info">
         Mostrando {{ paginaActual() * tamanio + 1 }} a
-        {{ [((paginaActual() + 1) * tamanio), totalElementos()] | min }} de
+        {{ [(paginaActual() + 1) * tamanio, totalElementos()] | min }} de
         {{ totalElementos() }} resultados
       </span>
 
       @if (totalPaginas() > 1) {
         <div class="paginacion">
-          <button class="pag-btn" [disabled]="paginaActual() === 0" (click)="irAPagina(0)" title="Primera">
+          <button
+            class="pag-btn"
+            [disabled]="paginaActual() === 0"
+            (click)="irAPagina(0)"
+            title="Primera"
+          >
             <i class="bi bi-chevron-double-left"></i>
           </button>
-          <button class="pag-btn" [disabled]="paginaActual() === 0" (click)="irAPagina(paginaActual() - 1)">
+          <button
+            class="pag-btn"
+            [disabled]="paginaActual() === 0"
+            (click)="irAPagina(paginaActual() - 1)"
+          >
             <i class="bi bi-chevron-left"></i>
           </button>
           @for (p of paginasVisibles(); track p) {
@@ -258,10 +298,19 @@
               {{ p + 1 }}
             </button>
           }
-          <button class="pag-btn" [disabled]="paginaActual() === totalPaginas() - 1" (click)="irAPagina(paginaActual() + 1)">
+          <button
+            class="pag-btn"
+            [disabled]="paginaActual() === totalPaginas() - 1"
+            (click)="irAPagina(paginaActual() + 1)"
+          >
             <i class="bi bi-chevron-right"></i>
           </button>
-          <button class="pag-btn" [disabled]="paginaActual() === totalPaginas() - 1" (click)="irAPagina(totalPaginas() - 1)" title="Última">
+          <button
+            class="pag-btn"
+            [disabled]="paginaActual() === totalPaginas() - 1"
+            (click)="irAPagina(totalPaginas() - 1)"
+            title="Última"
+          >
             <i class="bi bi-chevron-double-right"></i>
           </button>
         </div>
@@ -283,7 +332,6 @@
 @if (reporteVista()) {
   <div class="modal-overlay" (click)="cerrarVista()">
     <div class="modal-panel modal-panel--vista" (click)="$event.stopPropagation()">
-
       <!-- Header -->
       <div class="modal-header">
         <div class="mh-left">
@@ -303,10 +351,12 @@
       <!-- Imagen hero -->
       @if (srcImagen(reporteVista()); as srcDetalle) {
         <div class="modal-hero">
-          <img [src]="srcDetalle"
-               alt="Imagen del reporte #{{ reporteVista()!.idReporte }}"
-               class="modal-hero-img"
-               (error)="onImgError($event)" />
+          <img
+            [src]="srcDetalle"
+            alt="Imagen del reporte #{{ reporteVista()!.idReporte }}"
+            class="modal-hero-img"
+            (error)="onImgError($event)"
+          />
           <div class="modal-hero-overlay">
             <span class="hero-badge">
               <i class="bi bi-camera-fill me-1"></i>Fotografía del daño
@@ -322,7 +372,6 @@
 
       <!-- Cuerpo -->
       <div class="modal-body">
-
         <!-- Descripción destacada -->
         <div class="detalle-descripcion">
           <p class="detalle-desc-texto">
@@ -332,7 +381,6 @@
 
         <!-- ══ ANÁLISIS DE IA ══════════════════════════════════════════════ -->
         <section class="ia-panel">
-
           <div class="ia-panel-head">
             <div class="ia-head-left">
               <span class="ia-head-icon"><i class="bi bi-stars"></i></span>
@@ -341,10 +389,14 @@
                 <span class="ia-head-sub">Clasificación automática del deterioro vial</span>
               </div>
             </div>
-            <button class="btn-ia-reanalizar"
-                    [disabled]="reanalizando() || cargandoAnalisis()"
-                    (click)="reanalizar()"
-                    [title]="analisis() ? 'Volver a ejecutar el análisis con IA' : 'Analizar este reporte con IA'">
+            <button
+              class="btn-ia-reanalizar"
+              [disabled]="reanalizando() || cargandoAnalisis()"
+              (click)="reanalizar()"
+              [title]="
+                analisis() ? 'Volver a ejecutar el análisis con IA' : 'Analizar este reporte con IA'
+              "
+            >
               @if (reanalizando()) {
                 <span class="spinner-border spinner-border-sm me-1"></span>Analizando…
               } @else if (analisis()) {
@@ -357,17 +409,22 @@
 
           @if (cargandoAnalisis()) {
             <div class="ia-estado">
-              <div class="spinner-border text-secondary" style="width:1.6rem;height:1.6rem"></div>
+              <div
+                class="spinner-border text-secondary"
+                style="width: 1.6rem; height: 1.6rem"
+              ></div>
               <span>Cargando análisis…</span>
             </div>
-
           } @else if (analisis(); as a) {
-
             <!-- Veredicto -->
             <div class="ia-veredicto" [class.ia-veredicto--sin-dano]="!a.tieneDano">
               <div class="ia-veredicto-item">
                 <span class="ia-dato-label">Daño</span>
-                <span class="ia-dato-valor" [class.ia-si]="a.tieneDano" [class.ia-no]="!a.tieneDano">
+                <span
+                  class="ia-dato-valor"
+                  [class.ia-si]="a.tieneDano"
+                  [class.ia-no]="!a.tieneDano"
+                >
                   {{ a.tieneDano ? 'SÍ' : 'NO' }}
                 </span>
               </div>
@@ -384,11 +441,13 @@
               <div class="ia-veredicto-item">
                 <span class="ia-dato-label">
                   Calidad de evidencia
-                  <app-info-tip texto="No es la confianza del diagnóstico, sino qué tan legible era la foto. Es el promedio de cinco factores: encuadre, distancia y escala, iluminación, nitidez y oclusión." />
+                  <app-info-tip
+                    texto="No es la confianza del diagnóstico, sino qué tan legible era la foto. Es el promedio de cinco factores: encuadre, distancia y escala, iluminación, nitidez y oclusión."
+                  />
                 </span>
                 <span class="ia-dato-valor">
                   @if (a.nivelConfianza !== null) {
-                    {{ a.nivelConfianza | number:'1.0-0' }}%
+                    {{ a.nivelConfianza | number: '1.0-0' }}%
                   } @else {
                     —
                   }
@@ -406,8 +465,10 @@
                     <th class="ia-col-cant">Cantidad</th>
                     <th class="ia-col-conf">
                       Confianza del tipo
-                      <app-info-tip lado="arriba"
-                                   texto="Certeza de la IA sobre este tipo de deterioro en concreto. Es distinto de la calidad de la foto, que se mide arriba." />
+                      <app-info-tip
+                        lado="arriba"
+                        texto="Certeza de la IA sobre este tipo de deterioro en concreto. Es distinto de la calidad de la foto, que se mide arriba."
+                      />
                     </th>
                   </tr>
                 </thead>
@@ -416,7 +477,11 @@
                     <tr [class.ia-fila-activa]="t.detectado">
                       <td class="ia-col-tipo">{{ t.etiqueta }}</td>
                       <td class="ia-col-si">
-                        <span class="ia-si-no" [class.ia-si]="t.detectado" [class.ia-no]="!t.detectado">
+                        <span
+                          class="ia-si-no"
+                          [class.ia-si]="t.detectado"
+                          [class.ia-no]="!t.detectado"
+                        >
                           {{ t.detectado ? 'SÍ' : 'NO' }}
                         </span>
                       </td>
@@ -451,19 +516,19 @@
             }
 
             <div class="ia-footer">
-              <span>
-                <i class="bi bi-cpu me-1"></i>{{ a.modeloIaUtilizado }}
-              </span>
+              <span> <i class="bi bi-cpu me-1"></i>{{ a.modeloIaUtilizado }} </span>
               <span>
                 <i class="bi bi-clock me-1"></i>
-                {{ a.fechaProcesamiento | date:'dd/MM/yyyy HH:mm' }}
+                {{ a.fechaProcesamiento | date: 'dd/MM/yyyy HH:mm' }}
               </span>
             </div>
-
           } @else if (errorAnalisis()) {
             <div class="ia-estado ia-estado--vacio">
               <i class="bi bi-wifi-off"></i>
-              <span>No se pudo cargar el análisis. Verifica tu conexión y vuelve a abrir el reporte.</span>
+              <span
+                >No se pudo cargar el análisis. Verifica tu conexión y vuelve a abrir el
+                reporte.</span
+              >
             </div>
           } @else {
             <div class="ia-estado ia-estado--vacio">
@@ -475,7 +540,6 @@
 
         <!-- Grid de metadatos -->
         <div class="detalle-meta-grid">
-
           <div class="meta-item">
             <div class="meta-icon-wrap meta-icon-wrap--via">
               <i class="bi bi-signpost-2-fill"></i>
@@ -484,7 +548,12 @@
               <span class="meta-label">Vía asignada</span>
               @if (reporteVista()!.idVia) {
                 <span class="meta-valor">
-                  <span class="geo-chip geo-chip--sm">{{ reporteVista()!.nombreVia || 'Vía sin nombre' }}{{ reporteVista()!.codigoSegmento ? ' — ' + reporteVista()!.codigoSegmento : '' }}</span>
+                  <span class="geo-chip geo-chip--sm"
+                    >{{ reporteVista()!.nombreVia || 'Vía sin nombre'
+                    }}{{
+                      reporteVista()!.codigoSegmento ? ' — ' + reporteVista()!.codigoSegmento : ''
+                    }}</span
+                  >
                 </span>
               } @else {
                 <span class="meta-valor meta-valor--muted">Sin vía asignada</span>
@@ -498,8 +567,10 @@
             </div>
             <div class="meta-content">
               <span class="meta-label">Fecha de registro</span>
-              <span class="meta-valor">{{ reporteVista()!.fechaCreacion | date:'dd/MM/yyyy' }}</span>
-              <span class="meta-sub">{{ reporteVista()!.fechaCreacion | date:'HH:mm' }} hrs</span>
+              <span class="meta-valor">{{
+                reporteVista()!.fechaCreacion | date: 'dd/MM/yyyy'
+              }}</span>
+              <span class="meta-sub">{{ reporteVista()!.fechaCreacion | date: 'HH:mm' }} hrs</span>
             </div>
           </div>
 
@@ -511,11 +582,11 @@
               <div class="meta-content">
                 <span class="meta-label">Coordenadas capturadas</span>
                 <span class="meta-valor">
-                  {{ c.latitud | number:'1.5-5' }}, {{ c.longitud | number:'1.5-5' }}
+                  {{ c.latitud | number: '1.5-5' }}, {{ c.longitud | number: '1.5-5' }}
                 </span>
                 <span class="meta-sub">
                   @if (c.precisionReportadaMetros !== null) {
-                    Precisión {{ c.precisionReportadaMetros | number:'1.0-1' }} m
+                    Precisión {{ c.precisionReportadaMetros | number: '1.0-1' }} m
                   } @else {
                     Precisión no disponible
                   }
@@ -547,7 +618,6 @@
               </span>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -557,11 +627,9 @@
           <i class="bi bi-x me-1"></i>Cerrar
         </button>
       </div>
-
     </div>
   </div>
 }
-
 
 <!-- ══ MODAL CONFIRMAR ELIMINAR ═══════════════════════════════════════ -->
 @if (reporteAEliminar()) {
@@ -574,19 +642,15 @@
         <h3 class="confirm-titulo">Anular reporte</h3>
         <p class="confirm-texto">
           ¿Estás seguro de que querés anular el reporte
-          <strong>#{{ reporteAEliminar()!.idReporte }}</strong>?
-          Dejará de aparecer en la lista y en las estadísticas.
+          <strong>#{{ reporteAEliminar()!.idReporte }}</strong
+          >? Dejará de aparecer en la lista y en las estadísticas.
         </p>
         @if (reporteAEliminar()!.descripcion) {
-          <span class="confirm-desc-chip">
-            "{{ reporteAEliminar()!.descripcion }}"
-          </span>
+          <span class="confirm-desc-chip"> "{{ reporteAEliminar()!.descripcion }}" </span>
         }
       </div>
       <div class="confirm-footer">
-        <button class="btn-cancelar" (click)="cancelarEliminar()">
-          Cancelar
-        </button>
+        <button class="btn-cancelar" (click)="cancelarEliminar()">Cancelar</button>
         <button class="btn-eliminar-confirm" [disabled]="eliminando()" (click)="ejecutarEliminar()">
           @if (eliminando()) {
             <span class="spinner-border spinner-border-sm me-1"></span>Anulando…
@@ -601,7 +665,6 @@
 @if (reporteSeleccionado()) {
   <div class="modal-overlay" (click)="cerrarDetalle()">
     <div class="modal-panel modal-panel--editar" (click)="$event.stopPropagation()">
-
       <!-- Header -->
       <div class="modal-header">
         <div class="mh-left">
@@ -615,14 +678,15 @@
 
       <!-- Body dos columnas -->
       <div class="editar-layout">
-
         <!-- Columna izquierda: imagen + info -->
         <div class="editar-col-izq">
           @if (srcImagen(reporteSeleccionado()); as srcEditar) {
-            <img [src]="srcEditar"
-                 class="editar-hero-img"
-                 alt="Foto reporte"
-                 (error)="onImgError($event)" />
+            <img
+              [src]="srcEditar"
+              class="editar-hero-img"
+              alt="Foto reporte"
+              (error)="onImgError($event)"
+            />
           } @else {
             <div class="editar-hero-img editar-hero-img--empty">
               <i class="bi bi-image"></i>
@@ -630,11 +694,18 @@
           }
           <div class="editar-info-row">
             <span class="editar-meta-chip">
-              <i class="bi bi-calendar3"></i>{{ reporteSeleccionado()!.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+              <i class="bi bi-calendar3"></i
+              >{{ reporteSeleccionado()!.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}
             </span>
             @if (reporteSeleccionado()!.idVia) {
               <span class="editar-meta-chip">
-                <i class="bi bi-signpost-2-fill"></i>{{ reporteSeleccionado()!.nombreVia || 'Vía sin nombre' }}{{ reporteSeleccionado()!.codigoSegmento ? ' — ' + reporteSeleccionado()!.codigoSegmento : '' }}
+                <i class="bi bi-signpost-2-fill"></i
+                >{{ reporteSeleccionado()!.nombreVia || 'Vía sin nombre'
+                }}{{
+                  reporteSeleccionado()!.codigoSegmento
+                    ? ' — ' + reporteSeleccionado()!.codigoSegmento
+                    : ''
+                }}
               </span>
             }
             <span class="editar-meta-chip">
@@ -645,18 +716,28 @@
 
         <!-- Columna derecha: estado -->
         <div class="editar-col-der">
-          <p class="editar-desc-texto">{{ reporteSeleccionado()!.descripcion || 'Sin descripción' }}</p>
+          <p class="editar-desc-texto">
+            {{ reporteSeleccionado()!.descripcion || 'Sin descripción' }}
+          </p>
 
           <!-- Estado actual -->
           <div class="editar-seccion">
             <span class="editar-seccion-label">Estado actual</span>
             <div class="editar-estado-actual">
-              <span class="badge-estado badge-{{ reporteSeleccionado()!.estado | lowercase }} badge-estado--lg">
+              <span
+                class="badge-estado badge-{{
+                  reporteSeleccionado()!.estado | lowercase
+                }} badge-estado--lg"
+              >
                 <span class="badge-dot"></span>{{ etiquetaEstado(reporteSeleccionado()!.estado) }}
               </span>
               @if (nuevoEstado() !== reporteSeleccionado()!.estado) {
                 <i class="bi bi-arrow-right editar-arrow"></i>
-                <span class="badge-estado badge-{{ nuevoEstado() | lowercase }} badge-estado--lg badge-estado--nuevo">
+                <span
+                  class="badge-estado badge-{{
+                    nuevoEstado() | lowercase
+                  }} badge-estado--lg badge-estado--nuevo"
+                >
                   <span class="badge-dot"></span>{{ etiquetaEstado(nuevoEstado()) }}
                 </span>
               }
@@ -668,10 +749,17 @@
             <span class="editar-seccion-label">Seleccionar nuevo estado</span>
             <div class="estado-opciones-grid">
               @for (op of estadosCambio; track op.valor) {
-                <label class="estado-card" [class.selected]="nuevoEstado() === op.valor"
-                       [class.estado-card--current]="op.valor === reporteSeleccionado()!.estado">
-                  <input type="radio" [value]="op.valor" [checked]="nuevoEstado() === op.valor"
-                         (change)="nuevoEstado.set(op.valor)" />
+                <label
+                  class="estado-card"
+                  [class.selected]="nuevoEstado() === op.valor"
+                  [class.estado-card--current]="op.valor === reporteSeleccionado()!.estado"
+                >
+                  <input
+                    type="radio"
+                    [value]="op.valor"
+                    [checked]="nuevoEstado() === op.valor"
+                    (change)="nuevoEstado.set(op.valor)"
+                  />
                   <span class="estado-card-dot estado-dot-{{ op.valor | lowercase }}"></span>
                   <span class="estado-card-label">{{ op.etiqueta }}</span>
                   @if (op.valor === reporteSeleccionado()!.estado) {
@@ -684,16 +772,109 @@
               }
             </div>
           </div>
-        </div>
 
+          <!-- Vinculación vial -->
+          <div class="editar-seccion">
+            <span class="editar-seccion-label">Vía / segmento asociado</span>
+
+            @if (!reporteSeleccionado()!.idVia) {
+              <div class="alert alert-warning py-2 mb-2">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Este reporte está pendiente de asignación vial.
+              </div>
+            }
+
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Buscar por nombre o código de segmento"
+              [ngModel]="busquedaViaAdmin()"
+              (ngModelChange)="busquedaViaAdmin.set($event)"
+            />
+
+            @if (busquedaViaAdmin().trim()) {
+              <div class="mt-2">
+                @if (viasFiltradasAdmin().length > 0) {
+                  <div class="list-group">
+                    @for (via of viasFiltradasAdmin(); track via.idVia) {
+                      <button
+                        type="button"
+                        class="list-group-item list-group-item-action"
+                        [class.active]="viaSeleccionadaAdmin() === via.idVia"
+                        (click)="seleccionarViaAdmin(via.idVia)"
+                      >
+                        <strong>{{ via.nombreVia || 'Vía sin nombre' }}</strong>
+                        <br />
+                        <small>{{ via.codigoSegmento }}</small>
+                      </button>
+                    }
+                  </div>
+                } @else {
+                  <div class="text-muted small mt-2">No se encontraron coincidencias.</div>
+                }
+              </div>
+            }
+
+            <div class="mt-3">
+              <span class="editar-seccion-label">Ubicación del segmento</span>
+
+              <div
+                id="mapa-via-admin"
+                style="
+                  width: 100%;
+                  height: 260px;
+                  border-radius: 10px;
+                  overflow: hidden;
+                  margin-top: 8px;
+                "
+              ></div>
+            </div>
+
+            <button
+              type="button"
+              class="btn-guardar mt-2"
+              [disabled]="
+                guardandoVia() ||
+                viaSeleccionadaAdmin() === null ||
+                viaSeleccionadaAdmin() === reporteSeleccionado()!.idVia
+              "
+              (click)="guardarVia()"
+            >
+              @if (guardandoVia()) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+                Asignando…
+              } @else {
+                <i class="bi bi-signpost-2 me-1"></i>
+                Asignar vía
+              }
+            </button>
+          </div>
+
+          <div class="mt-2">
+            <span class="editar-seccion-label"> Ubicación del segmento </span>
+
+            <div
+              id="mapa-via-admin"
+              style="
+                width: 100%;
+                height: 260px;
+                border-radius: 10px;
+                overflow: hidden;
+                margin-top: 8px;
+              "
+            ></div>
+          </div>
+        </div>
       </div>
 
       <!-- Footer -->
       <div class="modal-footer">
         <button class="btn-cancelar" (click)="cerrarDetalle()">Cancelar</button>
-        <button class="btn-guardar"
-                [disabled]="guardandoEstado() || nuevoEstado() === reporteSeleccionado()!.estado"
-                (click)="guardarEstado()">
+        <button
+          class="btn-guardar"
+          [disabled]="guardandoEstado() || nuevoEstado() === reporteSeleccionado()!.estado"
+          (click)="guardarEstado()"
+        >
           @if (guardandoEstado()) {
             <span class="spinner-border spinner-border-sm me-1"></span>Guardando…
           } @else {
@@ -701,17 +882,14 @@
           }
         </button>
       </div>
-
     </div>
   </div>
 }
-
 
 <!-- ══ MODAL NUEVO REPORTE ════════════════════════════════════════════ -->
 @if (mostrarModalNuevo()) {
   <div class="modal-overlay" (click)="cerrarModalNuevo()">
     <div class="modal-panel modal-panel--nuevo" (click)="$event.stopPropagation()">
-
       <!-- Header -->
       <div class="modal-header">
         <div class="mh-left">
@@ -725,18 +903,16 @@
 
       <!-- Body en dos columnas -->
       <div class="nuevo-layout">
-
         <!-- ═══ COLUMNA IZQUIERDA — Preview ═══ -->
         <div class="nuevo-preview-col">
-
           <!-- Zona de preview -->
-          <div class="preview-zona"
-               [class.preview-zona--ok]="previewEstado() === 'ok'"
-               [class.preview-zona--error]="previewEstado() === 'error'"
-               [class.preview-zona--cargando]="previewEstado() === 'cargando'">
-
+          <div
+            class="preview-zona"
+            [class.preview-zona--ok]="previewEstado() === 'ok'"
+            [class.preview-zona--error]="previewEstado() === 'error'"
+            [class.preview-zona--cargando]="previewEstado() === 'cargando'"
+          >
             @switch (previewEstado()) {
-
               @case ('vacio') {
                 <div class="preview-placeholder">
                   <div class="preview-placeholder-icon">
@@ -750,16 +926,21 @@
               @case ('cargando') {
                 <div class="preview-placeholder">
                   <div class="preview-spinner">
-                    <div class="spinner-border" style="width:2rem;height:2rem;border-width:2px"></div>
+                    <div
+                      class="spinner-border"
+                      style="width: 2rem; height: 2rem; border-width: 2px"
+                    ></div>
                   </div>
                   <p class="preview-placeholder-sub">Cargando imagen…</p>
                 </div>
               }
 
               @case ('ok') {
-                <img class="preview-img"
-                     [src]="nuevoForm.imagenUrl"
-                     alt="Vista previa del reporte" />
+                <img
+                  class="preview-img"
+                  [src]="nuevoForm.imagenUrl"
+                  alt="Vista previa del reporte"
+                />
                 <div class="preview-ok-badge">
                   <i class="bi bi-check-circle-fill me-1"></i>Imagen válida
                 </div>
@@ -774,22 +955,23 @@
                   <p class="preview-placeholder-sub">Verifica que la URL sea pública y correcta</p>
                 </div>
               }
-
             }
           </div>
 
           <!-- Input URL debajo de la preview -->
-          <div class="form-group" style="margin-top: 10px;">
+          <div class="form-group" style="margin-top: 10px">
             <label class="form-label">
               <i class="bi bi-link-45deg me-1"></i>URL de imagen
               <span class="form-required">*</span>
             </label>
             <div class="url-input-wrap">
-              <input class="form-input url-input"
-                     type="url"
-                     placeholder="https://ejemplo.com/foto.jpg"
-                     [(ngModel)]="nuevoForm.imagenUrl"
-                     (ngModelChange)="onUrlChange()" />
+              <input
+                class="form-input url-input"
+                type="url"
+                placeholder="https://ejemplo.com/foto.jpg"
+                [(ngModel)]="nuevoForm.imagenUrl"
+                (ngModelChange)="onUrlChange()"
+              />
               @if (nuevoForm.imagenUrl) {
                 <button class="url-clear-btn" (click)="limpiarUrlImagen()" title="Limpiar URL">
                   <i class="bi bi-x"></i>
@@ -799,19 +981,31 @@
             <!-- Indicador de estado bajo el input -->
             <div class="url-estado-row">
               @switch (previewEstado()) {
-                @case ('ok')      { <span class="url-status url-status--ok"><i class="bi bi-check-circle-fill"></i>Imagen cargada correctamente</span> }
-                @case ('error')   { <span class="url-status url-status--error"><i class="bi bi-x-circle-fill"></i>URL inválida o sin acceso</span> }
-                @case ('cargando'){ <span class="url-status url-status--loading"><i class="bi bi-hourglass-split"></i>Verificando…</span> }
-                @default          { <span class="form-hint">URL pública de la fotografía del daño.</span> }
+                @case ('ok') {
+                  <span class="url-status url-status--ok"
+                    ><i class="bi bi-check-circle-fill"></i>Imagen cargada correctamente</span
+                  >
+                }
+                @case ('error') {
+                  <span class="url-status url-status--error"
+                    ><i class="bi bi-x-circle-fill"></i>URL inválida o sin acceso</span
+                  >
+                }
+                @case ('cargando') {
+                  <span class="url-status url-status--loading"
+                    ><i class="bi bi-hourglass-split"></i>Verificando…</span
+                  >
+                }
+                @default {
+                  <span class="form-hint">URL pública de la fotografía del daño.</span>
+                }
               }
             </div>
           </div>
-
         </div>
 
         <!-- ═══ COLUMNA DERECHA — Formulario ═══ -->
         <div class="nuevo-form-col">
-
           <!-- Aviso de contexto -->
           <div class="nuevo-aviso">
             <i class="bi bi-flask nuevo-aviso-icon"></i>
@@ -820,22 +1014,19 @@
 
           <!-- Descripción -->
           <div class="form-group">
-            <label class="form-label">
-              <i class="bi bi-chat-left-text me-1"></i>Descripción
-            </label>
-            <textarea class="form-textarea"
-                      rows="4"
-                      placeholder="Describe brevemente el daño vial observado…"
-                      [(ngModel)]="nuevoForm.descripcion"></textarea>
+            <label class="form-label"> <i class="bi bi-chat-left-text me-1"></i>Descripción </label>
+            <textarea
+              class="form-textarea"
+              rows="4"
+              placeholder="Describe brevemente el daño vial observado…"
+              [(ngModel)]="nuevoForm.descripcion"
+            ></textarea>
           </div>
 
           <!-- Vía -->
           <div class="form-group">
-            <label class="form-label">
-              <i class="bi bi-signpost-2 me-1"></i>Vía
-            </label>
-            <select class="form-input"
-                    [(ngModel)]="nuevoForm.idVia">
+            <label class="form-label"> <i class="bi bi-signpost-2 me-1"></i>Vía </label>
+            <select class="form-input" [(ngModel)]="nuevoForm.idVia">
               <option [ngValue]="null">— Sin vía asignada —</option>
               @for (via of vias(); track via.idVia) {
                 <option [ngValue]="via.idVia">
@@ -845,17 +1036,19 @@
             </select>
             <span class="form-hint">Seleccioná la vía afectada.</span>
           </div>
-
         </div>
-
       </div>
 
       <!-- Footer -->
       <div class="modal-footer">
         <button class="btn-cancelar" (click)="cerrarModalNuevo()">Cancelar</button>
-        <button class="btn-guardar"
-                [disabled]="guardandoNuevo() || !nuevoForm.imagenUrl.trim() || previewEstado() === 'error'"
-                (click)="guardarNuevo()">
+        <button
+          class="btn-guardar"
+          [disabled]="
+            guardandoNuevo() || !nuevoForm.imagenUrl.trim() || previewEstado() === 'error'
+          "
+          (click)="guardarNuevo()"
+        >
           @if (guardandoNuevo()) {
             <span class="spinner-border spinner-border-sm me-1"></span>Registrando…
           } @else {
@@ -863,7 +1056,6 @@
           }
         </button>
       </div>
-
     </div>
   </div>
 }

@@ -7,6 +7,7 @@ import com.infraestrctura.synthevia.dto.ReporteResumenDto;
 import com.infraestrctura.synthevia.entidad.Reporte;
 import com.infraestrctura.synthevia.servicio.ReporteService;
 import com.infraestrctura.synthevia.servicio.SupabaseStorageService;
+import com.infraestrctura.synthevia.dto.AsignarViaDto;
 import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
@@ -65,10 +66,6 @@ public class ReporteController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    /**
-     * URL firmada para descargar la evidencia. El bucket es privado, asi que el
-     * navegador no puede cargar la imagen solo con la ruta guardada.
-     */
     @GetMapping("/{id}/imagen")
     public ResponseEntity<Map<String, String>> imagen(@PathVariable Integer id) {
 
@@ -102,6 +99,21 @@ public class ReporteController {
         return ResponseEntity.ok(toDto(actualizado.get()));
     }
 
+    @PatchMapping("/{id}/via")
+    public ResponseEntity<Void> asignarVia( @PathVariable Integer id,
+            @Valid @RequestBody AsignarViaDto dto) {
+
+        boolean asignado = reporteService.asignarVia(id, dto.idVia());
+
+        if (!asignado) {
+            return ResponseEntity.notFound().build();
+        }
+
+        log.info("Reporte #{} vinculado a la vía #{}", id, dto.idVia());
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/estadisticas")
     public ResponseEntity<EstadisticasDto> estadisticas() {
 
@@ -120,10 +132,6 @@ public class ReporteController {
         return ResponseEntity.status(201).body(toDto(saved));
     }
 
-    /**
-     * Anulacion logica: el reporte deja de aparecer en el listado pero la fila y
-     * su bitacora de tiempos se conservan.
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> eliminar(
             @PathVariable Integer id) {

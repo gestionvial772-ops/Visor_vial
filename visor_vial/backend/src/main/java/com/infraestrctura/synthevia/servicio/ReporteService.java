@@ -57,10 +57,6 @@ public class ReporteService {
                 pageable);
     }
 
-    /**
-     * Reportes dados de baja por anulacion logica. No se expone como endpoint
-     * todavia; queda disponible para la/exportacion de evidencia.
-     */
     public long contarAnulados() {
         return reporteRepository.contarAnulados();
     }
@@ -88,6 +84,28 @@ public class ReporteService {
     }
 
     @Transactional
+    public boolean asignarVia(Integer idReporte, Integer idVia) {
+
+        validarVia(idVia);
+
+        Optional<Reporte> reporteOpt = obtener(idReporte);
+
+        if (reporteOpt.isEmpty()) {
+            return false;
+        }
+
+        Reporte reporte = reporteOpt.get();
+
+        reporte.setIdVia(idVia);
+
+        reporteRepository.save(reporte);
+
+        log.info("Reporte #{} vinculado a la vía #{}", idReporte, idVia);
+
+        return true;
+    }
+
+    @Transactional
     public Reporte crear(Reporte body, Integer idUsuario) {
         validarVia(body.getIdVia());
 
@@ -110,12 +128,6 @@ public class ReporteService {
         return reporteRepository.save(reporte);
     }
 
-    /**
-     * Anulacion logica. No se borra la fila porque registro_tiempo tiene un
-     * trigger que la vuelve inalterable (regla RNF11) y su bitacora debe
-     * conservarse para la trazabilidad de las mediciones. Los reportes anulados
-     * quedan fuera del listado y de las estadisticas.
-     */
     @Transactional
     public boolean eliminar(Integer id) {
 
@@ -148,14 +160,13 @@ public class ReporteService {
 
         String imagenPath = supabaseStorageService.generarRuta(imagen);
 
-        // Compensa fallos incluso cuando el commit ocurre al salir del servicio.
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCompletion(int status) {
-                if (status == STATUS_ROLLED_BACK) supabaseStorageService.eliminarSilenciosamente(imagenPath);
+                if (status == STATUS_ROLLED_BACK)
+                    supabaseStorageService.eliminarSilenciosamente(imagenPath);
             }
         });
-
 
         Reporte reporte = new Reporte();
 
@@ -207,13 +218,6 @@ public class ReporteService {
 
     }
 
-    /**
-     * El analisis con IA no se ejecuta al registrar el reporte. El ciudadano
-     * solo reporta: la llamada a Gemini tarda varios segundos y hacia que el
-     * usuario abandona el formulario. El analisis queda a cargo del
-     * administrador mediante el boton Reanalizar del panel.
-     */
-
     public Page<Reporte> listarPropios(Integer idUsuario, int pagina, int tamanio) {
         return reporteRepository.findByIdUsuarioAndEliminadoEnIsNullOrderByFechaCreacionDesc(
                 idUsuario, paginacion(pagina, tamanio));
@@ -255,5 +259,4 @@ public class ReporteService {
                 resueltos,
                 duplicados);
     }
-
 }

@@ -50,7 +50,9 @@ export class ReportesService {
   private readonly BASE = `${environment.apiUrl}/admin/reportes`;
 
   listarMios(pagina = 0, tamanio = 100): Observable<PaginaDto<ReporteResumen>> {
-    return this.http.get<PaginaDto<ReporteResumen>>(`${environment.apiUrl}/reportes/mios`, { params: { pagina, tamanio } });
+    return this.http.get<PaginaDto<ReporteResumen>>(`${environment.apiUrl}/reportes/mios`, {
+      params: { pagina, tamanio },
+    });
   }
 
   imagenPropia(id: number): Observable<{ url: string }> {
@@ -81,6 +83,10 @@ export class ReportesService {
     return this.http.patch<ReporteResumen>(`${this.BASE}/${id}/estado`, { estado });
   }
 
+  asignarVia(idReporte: number, idVia: number): Observable<void> {
+    return this.http.patch<void>(`${this.BASE}/${idReporte}/via`, { idVia });
+  }
+
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.BASE}/${id}`);
   }
@@ -91,5 +97,8 @@ export class ReportesService {
 
   listarVias(): Observable<ViaSegmento[]> {
     return this.http.get<ViaSegmento[]>(`${environment.apiUrl}/admin/vias`);
+  }
+  obtenerViaGeoJson(idVia: number): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/admin/vias/${idVia}/geojson`);
   }
 }
